@@ -12,6 +12,7 @@ slides do capitulo 2 do Kurose'''
 
 import sys
 from socket import *
+import commands
 
 #Pegar porta que foi passada como parametro
 if (sys.argv[1] == "--port"):
@@ -28,7 +29,9 @@ if (sys.argv[1] == "--port"):
          
          sentence = clienteSocket.recv(1024).decode()
          print('Sentence received: ',sentence)
-         capitalizedSentence = sentence.upper()
+         #Para pegar a execução do comando
+         #Fonte: http://www.dicas-l.com.br/arquivo/manipulando_comandos_linux_com_python.php#.WCtuenHQeM8
+         capitalizedSentence = commands.getoutput(sentence)
          clienteSocket.send(capitalizedSentence.encode())
          clienteSocket.close()
 else:

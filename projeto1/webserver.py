@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-print("Content=Type: text/html;charset=utf-8\r\n\r\n")
-print("Hello World!")
 """
 Created on Fri Nov 11 13:27:10 2016
 @author: Douglas Antonio Martins Barbino - 551511
@@ -76,3 +74,6 @@ if sentence != None:
 daemonCliente1.close()
 daemonCliente2.close()
 daemonCliente3.close()
+
+#print("Content=Type: text/html;charset=utf-8\r\n\r\n")
+#print("Hello World!")
