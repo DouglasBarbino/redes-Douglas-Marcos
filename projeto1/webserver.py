@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 """
@@ -23,6 +22,8 @@ def verificaComando (pagina, maquina, comando):
             return comando
         else:
             return (comando + ' ' + argumentos)
+    else:
+        return ''
         
         
 from socket import *
@@ -46,34 +47,37 @@ daemonCliente3 = socket(AF_INET, SOCK_STREAM)
 daemonCliente3.connect(("127.0.0.1", 9003))
 
 #Eventos
+sentence = ''
 for comando in comandos:   
     sentence += verificaComando (requisicoes, 'maq1', comando)
 #Verifica se enviado algum comando para aquele daemon:
 if sentence != None:
     daemonCliente1.send(sentence.encode())
-    modifiedSentence = daemonCliente1.recv(1024)
-    print ('From Server1:', modifiedSentence.decode())
+    modifiedSentence1 = daemonCliente1.recv(1024)   
 
+sentence = ''
 for comando in comandos:   
     sentence += verificaComando (requisicoes, 'maq2', comando)
 #Verifica se enviado algum comando para aquele daemon:
 if sentence != None:
     daemonCliente2.send(sentence.encode())
-    modifiedSentence = daemonCliente2.recv(1024)
-    print ('From Server2:', modifiedSentence.decode())
+    modifiedSentence2 = daemonCliente2.recv(1024)
 
+sentence = ''
 for comando in comandos:   
     sentence += verificaComando (requisicoes, 'maq3', comando)
 #Verifica se enviado algum comando para aquele daemon:
 if sentence != None:
     daemonCliente3.send(sentence.encode())
-    modifiedSentence = daemonCliente3.recv(1024)
-    print ('From Server3:', modifiedSentence.decode())
+    modifiedSentence3 = daemonCliente3.recv(1024)
 
 #Encerrando os sockets
 daemonCliente1.close()
 daemonCliente2.close()
 daemonCliente3.close()
 
-#print("Content=Type: text/html;charset=utf-8\r\n\r\n")
-#print("Hello World!")
+print("Content-Type: text/html;charset=utf-8\r\n\r\n")
+print("Hello World!")
+print("From Server1:", modifiedSentence1.decode())
+print("From Server2:", modifiedSentence2.decode())
+print("From Server3:", modifiedSentence3.decode())

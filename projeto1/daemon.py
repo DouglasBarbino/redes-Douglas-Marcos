@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 """
@@ -12,11 +11,16 @@ slides do capitulo 2 do Kurose'''
 
 import sys
 from socket import *
-import commands
+import subprocess
+
 
 #Pegar porta que foi passada como parametro
-if (sys.argv[1] == "--port"):
-    porta = sys.argv[2]
+if (sys.argv[1] != None):
+    #Para o caso de nao ser digitado o --port
+    if (sys.argv[1] == "--port"):
+        porta = sys.argv[2]
+    else:
+        porta = sys.argv[1]
 
     #Criacao do socket
     daemonServer = socket(AF_INET,SOCK_STREAM)
@@ -28,10 +32,13 @@ if (sys.argv[1] == "--port"):
          clienteSocket, endereco = daemonServer.accept()
          
          sentence = clienteSocket.recv(1024).decode()
-         print('Sentence received: ',sentence)
-         #Para pegar a execução do comando
-         #Fonte: http://www.dicas-l.com.br/arquivo/manipulando_comandos_linux_com_python.php#.WCtuenHQeM8
-         capitalizedSentence = commands.getoutput(sentence)
+         #SEPARAR PARAMETRO E COMANDO         
+         
+         #Para pegar a execucao do comando
+         #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
+         execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
+         (output, err) = execucao.communicate()
+         print('Sentence received: ', output)
          clienteSocket.send(capitalizedSentence.encode())
          clienteSocket.close()
 else:
