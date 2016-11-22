@@ -46,30 +46,34 @@ daemonCliente2.connect(("127.0.0.1", 9002))
 daemonCliente3 = socket(AF_INET, SOCK_STREAM)
 daemonCliente3.connect(("127.0.0.1", 9003))
 
-#Eventos
+#Eventos para enviar as mensagens
 sentence = ''
+modifiedSentence1 = 'Maquina 1:<br><br>'
 for comando in comandos:   
     sentence += verificaComando (requisicoes, 'maq1', comando)
-#Verifica se enviado algum comando para aquele daemon:
-if sentence != None:
-    daemonCliente1.send(sentence.encode())
-    modifiedSentence1 = daemonCliente1.recv(1024)   
+    #Verifica se enviado algum comando para aquele daemon:
+    if sentence != '':
+        daemonCliente1.send(sentence.encode())
+        sentence = daemonCliente1.recv(1024)
+        modifiedSentence1 += sentence.decode() + '<br><br>'
 
-sentence = ''
+modifiedSentence2 = 'Maquina 2:<br><br>'
 for comando in comandos:   
     sentence += verificaComando (requisicoes, 'maq2', comando)
-#Verifica se enviado algum comando para aquele daemon:
-if sentence != None:
-    daemonCliente2.send(sentence.encode())
-    modifiedSentence2 = daemonCliente2.recv(1024)
+    #Verifica se enviado algum comando para aquele daemon:
+    if sentence != '':
+        daemonCliente2.send(sentence.encode())
+        sentence = daemonCliente2.recv(1024)
+        modifiedSentence2 += sentence.decode() + '<br><br>'
 
-sentence = ''
+modifiedSentence3 = 'Maquina 3:<br><br>'
 for comando in comandos:   
     sentence += verificaComando (requisicoes, 'maq3', comando)
-#Verifica se enviado algum comando para aquele daemon:
-if sentence != None:
-    daemonCliente3.send(sentence.encode())
-    modifiedSentence3 = daemonCliente3.recv(1024)
+    #Verifica se enviado algum comando para aquele daemon:
+    if sentence != '':
+        daemonCliente3.send(sentence.encode())
+        sentence = daemonCliente3.recv(1024)
+        modifiedSentence3 += sentence.decode() + '<br><br>'
 
 #Encerrando os sockets
 daemonCliente1.close()
@@ -77,7 +81,6 @@ daemonCliente2.close()
 daemonCliente3.close()
 
 print("Content-Type: text/html;charset=utf-8\r\n\r\n")
-print("Hello World!")
-print("From Server1:", modifiedSentence1.decode())
-print("From Server2:", modifiedSentence2.decode())
-print("From Server3:", modifiedSentence3.decode())
+print(modifiedSentence1)
+print(modifiedSentence2)
+print(modifiedSentence3)

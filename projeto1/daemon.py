@@ -29,17 +29,17 @@ if (sys.argv[1] != None):
     
     #Eventos
     while True:
-         clienteSocket, endereco = daemonServer.accept()
+        clienteSocket, endereco = daemonServer.accept()
          
-         sentence = clienteSocket.recv(1024).decode()
-         #SEPARAR PARAMETRO E COMANDO         
+        sentence = clienteSocket.recv(1024).decode()
          
-         #Para pegar a execucao do comando
-         #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
-         execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
-         (output, err) = execucao.communicate()
-         print('Sentence received: ', output)
-         clienteSocket.send(capitalizedSentence.encode())
-         clienteSocket.close()
+        #Para pegar a execucao do comando
+        #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
+        execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
+        (output, err) = execucao.communicate()
+        print('Sentence received: ', output, '\r')
+        #Nao converte, pois a saida eh em bytes
+        clienteSocket.send(output)
+        clienteSocket.close()
 else:
     print("Eh necessario passar alguma porta como parametro!")
