@@ -13,10 +13,11 @@ import sys
 from socket import *
 import subprocess
 import argparse
+import string
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--port", help="comando para porta.")
+parser.add_argument("--port", type=int, help="comando para porta.")
 args = parser.parse_args()
 
 #Criacao do socket
@@ -35,7 +36,7 @@ while True:
     #talvez eu preferisse o pexpect
     execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
     (output, err) = execucao.communicate()
-    print('Sentence received: ', output, '\r')
+    print('Sentence received: ' + output +  '\r')
     #Nao converte, pois a saida eh em bytes
     clienteSocket.send(output)
     clienteSocket.close()
