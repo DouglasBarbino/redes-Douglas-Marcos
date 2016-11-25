@@ -117,6 +117,8 @@ daemonCliente2.close()
 daemonCliente3.close()
 
 modifiedSentence1 = modifiedSentence1.replace('\n', '<br />')
+modifiedSentence2 = modifiedSentence2.replace('\n', '<br />')
+modifiedSentence3 = modifiedSentence3.replace('\n', '<br />')
 
 print("Content-Type: text/html;charset=utf-8\r\n\r\n")
 print(modifiedSentence1)
