@@ -34,8 +34,10 @@ requisicoes = cgi.FieldStorage()
 # maquina 1
 maq1CheckboxPS = requisicoes.getvalue('maq1_ps') # checkbox ps
 maq1CommandPS = requisicoes.getvalue('maq1-ps') # textbox ps
-if(maq1CheckboxPS and maq1CommandPS):
-    maq1Command += maq1CheckboxPS + ' ' + maq1CommandPS
+if(maq1CheckboxPS):
+    maq1Command += requisicoes.getvalue('maq1_ps')
+    if(maq1CommandPS):
+        maq1Command += ' ' + requisicoes.getvalue('maq1-ps')
 
 maq1CheckboxDF = requisicoes.getvalue('maq1_df')
 maq1CommandDF = requisicoes.getvalue('maq1-df')
@@ -52,8 +54,10 @@ if(maq1CheckboxDF):
 # maquina 2
 maq2CheckboxPS = requisicoes.getvalue('maq2_ps') # checkbox ps
 maq2CommandPS = requisicoes.getvalue('maq2-ps') # textbox ps
-if(maq2CheckboxPS and maq2CommandPS):
-    maq2Command += maq2CheckboxPS + ' ' + maq2CommandPS
+if(maq2CheckboxPS):
+    maq2Command += requisicoes.getvalue('maq2_ps')
+    if(maq2CommandPS):
+        maq2Command += ' ' + requisicoes.getvalue('maq2-ps')
 
 maq2CheckboxDF = requisicoes.getvalue('maq2_df')
 maq2CommandDF = requisicoes.getvalue('maq2-df')
@@ -67,8 +71,10 @@ if(maq2CheckboxDF):
 # maquina 3
 maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
 maq3CommandPS = requisicoes.getvalue('maq3-ps') # textbox ps
-if(maq3CheckboxPS and maq3CommandPS):
-    maq3Command += maq3CheckboxPS + ' ' + maq3CommandPS
+if(maq3CheckboxPS):
+    maq3Command += requisicoes.getvalue('maq3_ps')
+    if(maq3CommandPS):
+        maq3Command += ' ' + requisicoes.getvalue('maq3-ps')
 
 maq3CheckboxDF = requisicoes.getvalue('maq3_df')
 maq3CommandDF = requisicoes.getvalue('maq3-df')
@@ -78,8 +84,6 @@ if(maq3CheckboxDF):
     maq3Command += requisicoes.getvalue('maq3_df') 
     if(maq3CommandDF):
         maq3Command += ' ' + requisicoes.getvalue('maq3-df')
-
-
 
 serverName = 'redesServer'
 
