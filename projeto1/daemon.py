@@ -29,7 +29,7 @@ daemonServer.listen(1)
 while True:
     clienteSocket, endereco = daemonServer.accept()
      
-    sentence = clienteSocket.recv(1024).decode()
+    sentence = clienteSocket.recv(2048).decode()
     print(sentence)
     #Para pegar a execucao do comando
     #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
