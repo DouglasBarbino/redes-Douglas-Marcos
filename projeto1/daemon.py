@@ -14,6 +14,24 @@ from socket import *
 import subprocess
 import argparse
 import string
+import thread
+
+BUFF_SIZE = 1024
+
+def handler(clientsock, addr):
+    while True:
+        data = clientsock.recv(BUFF_SIZE).decode()
+        if data != '':
+            print('commands received: ' + data)
+            executionOfCommands = subprocess.Popen(data, stdout=subprocess.PIPE, shell=True)
+            (data, err) = executionOfCommands.communicate()
+            print('output generated: ' + data + '\r')
+            clientsock.send(data)
+            break
+        else:
+            break
+            
+    clientsock.close()
 
 
 parser = argparse.ArgumentParser()
@@ -27,16 +45,9 @@ daemonServer.listen(1)
 
 #Eventos
 while True:
-    clienteSocket, endereco = daemonServer.accept()
-     
-    sentence = clienteSocket.recv(1024).decode()
-     
+    clientsock, addr = daemonServer.accept()
+    thread.start_new_thread(handler, (clientsock, addr))
     #Para pegar a execucao do comando
     #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
     #talvez eu preferisse o pexpect
-    execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
-    (output, err) = execucao.communicate()
-    print('Sentence received: ' + output +  '\r')
-    #Nao converte, pois a saida eh em bytes
-    clienteSocket.send(output)
-    clienteSocket.close()
+

@@ -14,9 +14,79 @@ from socket import *
 from threading import *
 import cgi, cgitb
 import string
+import time
+import struct
+
+BUFFER_SIZE = 1024
+
+#Funcao de divisao do pacote
+def recv_all(socket, timeout=2):
+    socket.setblocking(0)
+
+    full_data = []
+    data = ''
+    begin=time.time()
+    while True:
+        #tenho dado, break depois do timeout
+        if full_data and time.time()-begin > timeout:
+            break
+        #nao consegui dado, espero 2 vezes o timeout
+        elif time.time()-begin > timeout * 2:
+            break
+
+        try:
+            data = socket.recv(BUFFER_SIZE)
+            if data:
+                full_data.append(data)
+                #timeout resetado
+                begin = time.time()
+            else:
+                #dorme para mostrar atraso?
+                time.sleep(0.1)
+        except:
+               pass
+    return ''.join(full_data)
+
+#threading send function
+def send_command(socket, command, flags):
+    #the following comments are flags for the pack and unpack proccess
+    header_version              =   2                               #B - unsigned char
+    header_ihdl                 =   8                               #B - unsigned char
+    header_tos                  =   0                               #B - unsigned char
+    header_total_length         =   0                               #H - unsigned short
+    header_identification       =   0                               #H - unsigned short
+    header_flags                =   000                             #H - unsigned short
+    header_fragment             =   0                               #H - unsigned short
+    header_ttl                  =   255                             #B - unsigned char
+    header_protocol             =   command                         #B - unsigned char
+    header_checksum             =   0 #adjust later                 #H - unsgined short
+    header_sourceaddress        =   socket.getsockname()            #4s - 4 string chars
+    header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #4s - 4 string chars
+    header_options              =   flags                           #xs - x is the number of chars
+
+    #remove duplicated spaces
+    flags = " ".join(flags.split())
+    #remove weird spaces
+    flags = flags.strip()
+
+    #get size of the amount of flags
+    flags_pack = '' + len(flags)
+    flags_pack = '!BBBHHHHBBH4s4s' + flags_pack + 's'
+
+    ip_header = pack(flags_pack, header_version, header_ihdl, 
+                header_tos, header_total_length, header_identification,
+                header_flags, header_fragment, header_ttl, header_protocol,
+                header_checksum, header_sourceaddress, header_destinationaddress,
+                header_options, flags)
+
+
+    return
 
 #Lista dos comandos
 comandos = ['ps', 'df', 'finger', 'uptime']
+
+
+
 # contador de maquinas para possivel threading
 machines_to_use = 0
 # string para comandos nas maquinas
@@ -46,6 +116,10 @@ if(maq1CheckboxDF):
     if(maq1CommandDF):
         maq1Command += ' ' + requisicoes.getvalue('maq1-df')
 
+maq1CheckboxUP = requisicoes.getvalue('maq1_uptime')
+
+maq1CheckboxFINGER = requisicoes.getvalue('maq1_finger')
+
 # finger nao ta funcionando
 # up tambem nao
 
@@ -64,6 +138,10 @@ if(maq2CheckboxDF):
     if(maq2CommandDF):
         maq2Command += ' ' + requisicoes.getvalue('maq2-df')
 
+maq2CheckboxUP = requisicoes.getvalue('maq2_uptime')
+
+maq2CheckboxFINGER = requisicoes.getvalue('maq2_finger')
+
 # maquina 3
 maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
 maq3CommandPS = requisicoes.getvalue('maq3-ps') # textbox ps
@@ -78,6 +156,10 @@ if(maq3CheckboxDF):
     maq3Command += requisicoes.getvalue('maq3_df') 
     if(maq3CommandDF):
         maq3Command += ' ' + requisicoes.getvalue('maq3-df')
+
+maq3CheckboxUP = requisicoes.getvalue('maq3_uptime')
+
+maq3CheckboxFINGER = requisicoes.getvalue('maq3_finger')
 
 
 
