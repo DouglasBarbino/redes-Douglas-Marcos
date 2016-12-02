@@ -45,9 +45,24 @@ daemonServer.listen(1)
 
 #Eventos
 while True:
+<<<<<<< HEAD
     clientsock, addr = daemonServer.accept()
     thread.start_new_thread(handler, (clientsock, addr))
     #Para pegar a execucao do comando
     #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
     #talvez eu preferisse o pexpect
 
+=======
+    clienteSocket, endereco = daemonServer.accept()
+     
+    sentence = clienteSocket.recv(2048).decode()
+    print(sentence)
+    #Para pegar a execucao do comando
+    #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
+    #talvez eu preferisse o pexpect
+    execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
+    (output, err) = execucao.communicate()
+    #Nao converte, pois a saida eh em bytes
+    clienteSocket.send(output)
+    clienteSocket.close()
+>>>>>>> a9056eb48d67775cad2b4107745a0730edee8194

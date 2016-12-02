@@ -19,6 +19,20 @@ import struct
 
 BUFFER_SIZE = 1024
 
+def crcSixteen(buffer, crc = 0, poly = 0xa001):
+    buffSize = len(buffer)
+    
+    for i in range(0, buffSize):
+        char = ord(buffer[i])
+        for unsiChar in range(0, 8):
+            if(crc & 1) ^ (char & 1):
+                crc = (crc >> 1) ^ poly
+            else:
+                crc >>= 1
+            char >>= 1
+
+    return crc
+
 #Funcao de divisao do pacote
 def recv_all(socket, timeout=2):
     socket.setblocking(0)
@@ -93,6 +107,8 @@ machines_to_use = 0
 maq1Command = ''
 maq2Command = ''
 maq3Command = ''
+# string que recebe as mensagens
+sentence = ''
 
 cgitb.enable()
 
@@ -104,39 +120,60 @@ requisicoes = cgi.FieldStorage()
 # maquina 1
 maq1CheckboxPS = requisicoes.getvalue('maq1_ps') # checkbox ps
 maq1CommandPS = requisicoes.getvalue('maq1-ps') # textbox ps
-if(maq1CheckboxPS and maq1CommandPS):
-    maq1Command += maq1CheckboxPS + ' ' + maq1CommandPS
+if(maq1CheckboxPS):
+    maq1Command += requisicoes.getvalue('maq1_ps')
+    if(maq1CommandPS):
+        maq1Command += ' ' + requisicoes.getvalue('maq1-ps')
 
-maq1CheckboxDF = requisicoes.getvalue('maq1_df')
-maq1CommandDF = requisicoes.getvalue('maq1-df')
+maq1CheckboxDF = requisicoes.getvalue('maq1_df') # checkbox df
+maq1CommandDF = requisicoes.getvalue('maq1-df') # textbox df
 if(maq1CheckboxDF):
     if(maq1Command):
         maq1Command += ' && '
     maq1Command += requisicoes.getvalue('maq1_df') 
     if(maq1CommandDF):
         maq1Command += ' ' + requisicoes.getvalue('maq1-df')
+        
+maq1CheckboxUPTIME = requisicoes.getvalue('maq1_uptime') # checkbox uptime
+maq1CommandUPTIME = requisicoes.getvalue('maq1-uptime') # textbox uptime
+if(maq1CheckboxUPTIME):
+    if(maq1Command):
+        maq1Command += ' && '
+    maq1Command += requisicoes.getvalue('maq1_uptime') 
+    if(maq1CommandUPTIME):
+        maq1Command += ' ' + requisicoes.getvalue('maq1-uptime')
 
 maq1CheckboxUP = requisicoes.getvalue('maq1_uptime')
 
 maq1CheckboxFINGER = requisicoes.getvalue('maq1_finger')
 
 # finger nao ta funcionando
-# up tambem nao
 
 # maquina 2
 maq2CheckboxPS = requisicoes.getvalue('maq2_ps') # checkbox ps
 maq2CommandPS = requisicoes.getvalue('maq2-ps') # textbox ps
-if(maq2CheckboxPS and maq2CommandPS):
-    maq2Command += maq2CheckboxPS + ' ' + maq2CommandPS
+if(maq2CheckboxPS):
+    maq2Command += requisicoes.getvalue('maq2_ps')
+    if(maq2CommandPS):
+        maq2Command += ' ' + requisicoes.getvalue('maq2-ps')
 
-maq2CheckboxDF = requisicoes.getvalue('maq2_df')
-maq2CommandDF = requisicoes.getvalue('maq2-df')
+maq2CheckboxDF = requisicoes.getvalue('maq2_df') # checkbox df
+maq2CommandDF = requisicoes.getvalue('maq2-df') #textbox df
 if(maq2CheckboxDF):
     if(maq2Command):
         maq2Command += ' && '
     maq2Command += requisicoes.getvalue('maq2_df') 
     if(maq2CommandDF):
         maq2Command += ' ' + requisicoes.getvalue('maq2-df')
+        
+maq2CheckboxUPTIME = requisicoes.getvalue('maq2_uptime') # checkbox uptime
+maq2CommandUPTIME = requisicoes.getvalue('maq2-uptime') # textbox uptime
+if(maq2CheckboxUPTIME):
+    if(maq2Command):
+        maq2Command += ' && '
+    maq2Command += requisicoes.getvalue('maq2_uptime') 
+    if(maq2CommandUPTIME):
+        maq2Command += ' ' + requisicoes.getvalue('maq2-uptime')
 
 maq2CheckboxUP = requisicoes.getvalue('maq2_uptime')
 
@@ -145,23 +182,37 @@ maq2CheckboxFINGER = requisicoes.getvalue('maq2_finger')
 # maquina 3
 maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
 maq3CommandPS = requisicoes.getvalue('maq3-ps') # textbox ps
-if(maq3CheckboxPS and maq3CommandPS):
-    maq3Command += maq3CheckboxPS + ' ' + maq3CommandPS
+if(maq3CheckboxPS):
+    maq3Command += requisicoes.getvalue('maq3_ps')
+    if(maq3CommandPS):
+        maq3Command += ' ' + requisicoes.getvalue('maq3-ps')
 
-maq3CheckboxDF = requisicoes.getvalue('maq3_df')
-maq3CommandDF = requisicoes.getvalue('maq3-df')
+maq3CheckboxDF = requisicoes.getvalue('maq3_df') # checkbox df
+maq3CommandDF = requisicoes.getvalue('maq3-df') # textbox df
 if(maq3CheckboxDF):
     if(maq3Command):
         maq3Command += ' && '
     maq3Command += requisicoes.getvalue('maq3_df') 
     if(maq3CommandDF):
         maq3Command += ' ' + requisicoes.getvalue('maq3-df')
+<<<<<<< HEAD
 
 maq3CheckboxUP = requisicoes.getvalue('maq3_uptime')
 
 maq3CheckboxFINGER = requisicoes.getvalue('maq3_finger')
 
 
+=======
+        
+maq3CheckboxUPTIME = requisicoes.getvalue('maq3_uptime') # checkbox uptime
+maq3CommandUPTIME = requisicoes.getvalue('maq3-uptime') # textbox uptime
+if(maq3CheckboxUPTIME):
+    if(maq3Command):
+        maq3Command += ' && '
+    maq3Command += requisicoes.getvalue('maq3_uptime') 
+    if(maq3CommandUPTIME):
+        maq3Command += ' ' + requisicoes.getvalue('maq3-uptime')
+>>>>>>> a9056eb48d67775cad2b4107745a0730edee8194
 
 serverName = 'redesServer'
 
@@ -174,23 +225,22 @@ daemonCliente3 = socket(AF_INET, SOCK_STREAM)
 daemonCliente3.connect(("127.0.0.1", 9003))
 
 #Eventos para enviar as mensagens
-sentence = ''
 modifiedSentence1 = 'Maquina 1:<br><br>'
 if(maq1Command):
     daemonCliente1.send(maq1Command.encode())
-    sentence = daemonCliente1.recv(1024)
+    sentence = daemonCliente1.recv(2048)
     modifiedSentence1 += sentence.decode() + '<br><br>'
 
 modifiedSentence2 = 'Maquina 2:<br><br>'
 if(maq2Command):
     daemonCliente2.send(maq2Command.encode())
-    sentence = daemonCliente2.recv(1024)
+    sentence = daemonCliente2.recv(2048)
     modifiedSentence2 += sentence.decode() + '<br><br>'
 
 modifiedSentence3 = 'Maquina 3:<br><br>'
 if(maq3Command):
     daemonCliente3.send(maq3Command.encode())
-    sentence = daemonCliente3.recv(1024)
+    sentence = daemonCliente3.recv(2048)
     modifiedSentence3 += sentence.decode() + '<br><br>'
 
 #Encerrando os sockets
