@@ -16,6 +16,7 @@ import cgi, cgitb
 import string
 import time
 import struct
+import thread
 
 BUFFER_SIZE = 1024
 
@@ -76,7 +77,7 @@ def send_command(socket, command, flags):
     header_checksum             =   0 #adjust later                 #H - unsgined short
     header_sourceaddress        =   socket.getsockname()            #4s - 4 string chars
     header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #4s - 4 string chars
-    header_options              =   flags                           #xs - x is the number of chars
+    header_options              =   command + " " + flags           #xs - x is the number of chars
 
     #remove duplicated spaces
     flags = " ".join(flags.split())
@@ -93,20 +94,16 @@ def send_command(socket, command, flags):
                 header_checksum, header_sourceaddress, header_destinationaddress,
                 header_options, flags)
 
+    socket.send(ip_header).encode()
 
     return
 
 #Lista dos comandos
 comandos = ['ps', 'df', 'finger', 'uptime']
 
-
-
 # contador de maquinas para possivel threading
-machines_to_use = 0
-# string para comandos nas maquinas
-maq1Command = ''
-maq2Command = ''
-maq3Command = ''
+# machines_to_use = 0
+
 # string que recebe as mensagens
 sentence = ''
 
@@ -118,12 +115,15 @@ cgitb.enable()
 requisicoes = cgi.FieldStorage()     
 
 # maquina 1
-maq1CheckboxPS = requisicoes.getvalue('maq1_ps') # checkbox ps
-maq1CommandPS = requisicoes.getvalue('maq1-ps') # textbox ps
-if(maq1CheckboxPS):
-    maq1Command += requisicoes.getvalue('maq1_ps')
-    if(maq1CommandPS):
-        maq1Command += ' ' + requisicoes.getvalue('maq1-ps')
+maq1Checkbox = requisicoes.getvalue('maq1_ps') # checkbox ps
+maq1Command = requisicoes.getvalue('maq1-ps') # textbox ps
+if(maq1Checkbox && maq1Command):
+    daemonCliente1 = socket(AF_INET, SOCK_STREAM)
+    daemonCliente1.connect(("127.0.0.1", 9001))    
+    thread.start_new_thread(send_command, (daemonCliente1, maq1Checkbox, maq1Command))
+
+sentence += thread.start_new_thread(recv_all, (daemonCliente1))
+
 
 maq1CheckboxDF = requisicoes.getvalue('maq1_df') # checkbox df
 maq1CommandDF = requisicoes.getvalue('maq1-df') # textbox df
@@ -151,6 +151,9 @@ if(maq1CheckboxUPTIME):
     maq1Command += requisicoes.getvalue('maq1_uptime') 
     if(maq1CommandUPTIME):
         maq1Command += ' ' + requisicoes.getvalue('maq1-uptime')
+
+#verify if machine 1 is resquisited by the page
+requisitionMaq1 = (maq1CheckboxPS || maq1CheckboxUPTIME || maq1CheckboxFINGER || maq1CheckboxDF)
 
 # maquina 2
 maq2CheckboxPS = requisicoes.getvalue('maq2_ps') # checkbox ps
@@ -187,6 +190,9 @@ if(maq2CheckboxUPTIME):
     if(maq2CommandUPTIME):
         maq2Command += ' ' + requisicoes.getvalue('maq2-uptime')
 
+#verify if machine 2 is resquisited by the page
+requisitionMaq2 = (maq2CheckboxPS || maq2CheckboxUPTIME || maq2CheckboxFINGER || maq2CheckboxDF)
+
 # maquina 3
 maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
 maq3CommandPS = requisicoes.getvalue('maq3-ps') # textbox ps
@@ -222,15 +228,27 @@ if(maq3CheckboxUPTIME):
     if(maq3CommandUPTIME):
         maq3Command += ' ' + requisicoes.getvalue('maq3-uptime')
 
+#verify if machine 3 is resquisited by the page
+requisitionMaq3 = (maq3CheckboxPS || maq3CheckboxUPTIME || maq3CheckboxFINGER || maq3CheckboxDF)
+
 serverName = 'redesServer'
 
+
+
 #Criacao dos sockets
-daemonCliente1 = socket(AF_INET, SOCK_STREAM)
-daemonCliente1.connect(("127.0.0.1", 9001))
-daemonCliente2 = socket(AF_INET, SOCK_STREAM)
-daemonCliente2.connect(("127.0.0.1", 9002))
-daemonCliente3 = socket(AF_INET, SOCK_STREAM)
-daemonCliente3.connect(("127.0.0.1", 9003))
+#only if its needed
+if(requisitionMaq1):
+
+
+if(requisitionMaq2):
+    daemonCliente2 = socket(AF_INET, SOCK_STREAM)
+    daemonCliente2.connect(("127.0.0.1", 9002))
+
+if(requisitionMaq3):
+    daemonCliente3 = socket(AF_INET, SOCK_STREAM)
+    daemonCliente3.connect(("127.0.0.1", 9003))
+
+send_command
 
 #Eventos para enviar as mensagens
 modifiedSentence1 = 'Maquina 1:<br><br>'
