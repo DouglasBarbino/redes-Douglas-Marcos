@@ -133,6 +133,15 @@ if(maq1CheckboxDF):
     maq1Command += requisicoes.getvalue('maq1_df') 
     if(maq1CommandDF):
         maq1Command += ' ' + requisicoes.getvalue('maq1-df')
+
+maq1CheckboxFINGER = requisicoes.getvalue('maq1_finger') # checkbox finger
+maq1CommandFINGER = requisicoes.getvalue('maq1-finger') # textbox finger
+if(maq1CheckboxFINGER):
+    if(maq1Command):
+        maq1Command += ' && '
+    maq1Command += requisicoes.getvalue('maq1_finger') 
+    if(maq1CommandFINGER):
+        maq1Command += ' ' + requisicoes.getvalue('maq1-finger')        
         
 maq1CheckboxUPTIME = requisicoes.getvalue('maq1_uptime') # checkbox uptime
 maq1CommandUPTIME = requisicoes.getvalue('maq1-uptime') # textbox uptime
@@ -142,12 +151,6 @@ if(maq1CheckboxUPTIME):
     maq1Command += requisicoes.getvalue('maq1_uptime') 
     if(maq1CommandUPTIME):
         maq1Command += ' ' + requisicoes.getvalue('maq1-uptime')
-
-maq1CheckboxUP = requisicoes.getvalue('maq1_uptime')
-
-maq1CheckboxFINGER = requisicoes.getvalue('maq1_finger')
-
-# finger nao ta funcionando
 
 # maquina 2
 maq2CheckboxPS = requisicoes.getvalue('maq2_ps') # checkbox ps
@@ -166,6 +169,15 @@ if(maq2CheckboxDF):
     if(maq2CommandDF):
         maq2Command += ' ' + requisicoes.getvalue('maq2-df')
         
+maq2CheckboxFINGER = requisicoes.getvalue('maq2_finger') # checkbox finger
+maq2CommandFINGER = requisicoes.getvalue('maq2-finger') # textbox finger
+if(maq2CheckboxFINGER):
+    if(maq2Command):
+        maq2Command += ' && '
+    maq2Command += requisicoes.getvalue('maq2_finger') 
+    if(maq2CommandFINGER):
+        maq2Command += ' ' + requisicoes.getvalue('maq2-finger')  
+        
 maq2CheckboxUPTIME = requisicoes.getvalue('maq2_uptime') # checkbox uptime
 maq2CommandUPTIME = requisicoes.getvalue('maq2-uptime') # textbox uptime
 if(maq2CheckboxUPTIME):
@@ -174,10 +186,6 @@ if(maq2CheckboxUPTIME):
     maq2Command += requisicoes.getvalue('maq2_uptime') 
     if(maq2CommandUPTIME):
         maq2Command += ' ' + requisicoes.getvalue('maq2-uptime')
-
-maq2CheckboxUP = requisicoes.getvalue('maq2_uptime')
-
-maq2CheckboxFINGER = requisicoes.getvalue('maq2_finger')
 
 # maquina 3
 maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
@@ -195,14 +203,15 @@ if(maq3CheckboxDF):
     maq3Command += requisicoes.getvalue('maq3_df') 
     if(maq3CommandDF):
         maq3Command += ' ' + requisicoes.getvalue('maq3-df')
-<<<<<<< HEAD
-
-maq3CheckboxUP = requisicoes.getvalue('maq3_uptime')
-
-maq3CheckboxFINGER = requisicoes.getvalue('maq3_finger')
-
-
-=======
+        
+maq3CheckboxFINGER = requisicoes.getvalue('maq3_finger') # checkbox finger
+maq3CommandFINGER = requisicoes.getvalue('maq3-finger') # textbox finger
+if(maq3CheckboxFINGER):
+    if(maq3Command):
+        maq3Command += ' && '
+    maq3Command += requisicoes.getvalue('maq3_finger') 
+    if(maq3CommandFINGER):
+        maq3Command += ' ' + requisicoes.getvalue('maq3-finger')  
         
 maq3CheckboxUPTIME = requisicoes.getvalue('maq3_uptime') # checkbox uptime
 maq3CommandUPTIME = requisicoes.getvalue('maq3-uptime') # textbox uptime
@@ -212,7 +221,6 @@ if(maq3CheckboxUPTIME):
     maq3Command += requisicoes.getvalue('maq3_uptime') 
     if(maq3CommandUPTIME):
         maq3Command += ' ' + requisicoes.getvalue('maq3-uptime')
->>>>>>> a9056eb48d67775cad2b4107745a0730edee8194
 
 serverName = 'redesServer'
 
@@ -228,19 +236,19 @@ daemonCliente3.connect(("127.0.0.1", 9003))
 modifiedSentence1 = 'Maquina 1:<br><br>'
 if(maq1Command):
     daemonCliente1.send(maq1Command.encode())
-    sentence = daemonCliente1.recv(2048)
+    sentence = daemonCliente1.recv(1024)
     modifiedSentence1 += sentence.decode() + '<br><br>'
 
 modifiedSentence2 = 'Maquina 2:<br><br>'
 if(maq2Command):
     daemonCliente2.send(maq2Command.encode())
-    sentence = daemonCliente2.recv(2048)
+    sentence = daemonCliente2.recv(1024)
     modifiedSentence2 += sentence.decode() + '<br><br>'
 
 modifiedSentence3 = 'Maquina 3:<br><br>'
 if(maq3Command):
     daemonCliente3.send(maq3Command.encode())
-    sentence = daemonCliente3.recv(2048)
+    sentence = daemonCliente3.recv(1024)
     modifiedSentence3 += sentence.decode() + '<br><br>'
 
 #Encerrando os sockets
