@@ -117,7 +117,7 @@ requisicoes = cgi.FieldStorage()
 # maquina 1
 maq1Checkbox = requisicoes.getvalue('maq1_ps') # checkbox ps
 maq1Command = requisicoes.getvalue('maq1-ps') # textbox ps
-if(maq1Checkbox && maq1Command):
+if(maq1Checkbox and maq1Command):
     daemonCliente1 = socket(AF_INET, SOCK_STREAM)
     daemonCliente1.connect(("127.0.0.1", 9001))    
     thread.start_new_thread(send_command, (daemonCliente1, maq1Checkbox, maq1Command))
@@ -153,7 +153,7 @@ if(maq1CheckboxUPTIME):
         maq1Command += ' ' + requisicoes.getvalue('maq1-uptime')
 
 #verify if machine 1 is resquisited by the page
-requisitionMaq1 = (maq1CheckboxPS || maq1CheckboxUPTIME || maq1CheckboxFINGER || maq1CheckboxDF)
+requisitionMaq1 = (maq1CheckboxPS or maq1CheckboxUPTIME or maq1CheckboxFINGER or maq1CheckboxDF)
 
 # maquina 2
 maq2CheckboxPS = requisicoes.getvalue('maq2_ps') # checkbox ps
@@ -191,7 +191,7 @@ if(maq2CheckboxUPTIME):
         maq2Command += ' ' + requisicoes.getvalue('maq2-uptime')
 
 #verify if machine 2 is resquisited by the page
-requisitionMaq2 = (maq2CheckboxPS || maq2CheckboxUPTIME || maq2CheckboxFINGER || maq2CheckboxDF)
+requisitionMaq2 = (maq2CheckboxPS or maq2CheckboxUPTIME or maq2CheckboxFINGER or maq2CheckboxDF)
 
 # maquina 3
 maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
@@ -229,7 +229,7 @@ if(maq3CheckboxUPTIME):
         maq3Command += ' ' + requisicoes.getvalue('maq3-uptime')
 
 #verify if machine 3 is resquisited by the page
-requisitionMaq3 = (maq3CheckboxPS || maq3CheckboxUPTIME || maq3CheckboxFINGER || maq3CheckboxDF)
+requisitionMaq3 = (maq3CheckboxPS or maq3CheckboxUPTIME or maq3CheckboxFINGER or maq3CheckboxDF)
 
 serverName = 'redesServer'
 
@@ -237,7 +237,7 @@ serverName = 'redesServer'
 
 #Criacao dos sockets
 #only if its needed
-if(requisitionMaq1):
+#if(requisitionMaq1):
 
 
 if(requisitionMaq2):
