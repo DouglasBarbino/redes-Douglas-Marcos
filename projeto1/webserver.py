@@ -20,6 +20,33 @@ import thread
 
 BUFFER_SIZE = 1024
 
+# simplifying this html stuff (too long and too ugly)
+def verifyCheckboxHtml(maqNumber, req):
+    # using a binary flag because im fancy
+    # 1 - ps | 2 - df | 4 - finger | 8 - uptime
+    command = 0
+    maqCheckbox = req.getvalue('maq' + maqNumber + '_ps')
+    if(maqCheckbox):
+        command = command | 1
+
+    maqCheckbox = req.getvalue('maq' + maqNumber + '_df')
+    if(maqCheckbox):
+        command = command | 2
+
+    maqCheckbox = req.getvalue('maq' + maqNumber + '_finger')
+    if(maqCheckbox):
+        command = command | 4
+
+    maqCheckbox = req.getvalue('maq' + maqNumber + '_uptime')
+    if(maqCheckbox):
+        command = command | 8
+
+    return command
+
+def getFlagsHtml(maqNumber, command, req):
+    return req.getvalue('maq' + maqNumber + '-' + command)
+
+#works don't ask me why
 def crcSixteen(buffer, crc = 0, poly = 0xa001):
     buffSize = len(buffer)
     
@@ -34,7 +61,7 @@ def crcSixteen(buffer, crc = 0, poly = 0xa001):
 
     return crc
 
-#Funcao de divisao do pacote
+# functions for network operations
 def recv_all(socket, timeout=2):
     socket.setblocking(0)
 
@@ -109,146 +136,33 @@ sentence = ''
 
 cgitb.enable()
 
-#Pegando os dados da pagina HTML
-# a gente vai precisar cortar isso dps
+# we fancy in html verification now
 
-requisicoes = cgi.FieldStorage()     
+req = cgi.FieldStorage()     
 
-# maquina 1
-maq1Checkbox = requisicoes.getvalue('maq1_ps') # checkbox ps
-maq1Command = requisicoes.getvalue('maq1-ps') # textbox ps
-if(maq1Checkbox and maq1Command):
-    daemonCliente1 = socket(AF_INET, SOCK_STREAM)
-    daemonCliente1.connect(("127.0.0.1", 9001))    
-    thread.start_new_thread(send_command, (daemonCliente1, maq1Checkbox, maq1Command))
+commandMaq1 = verifyHtml('1', req)
+commandMaq2 = verifyHtml('2', req)
+commandMaq3 = verifyHtml('3', req)
 
-sentence += thread.start_new_thread(recv_all, (daemonCliente1))
-
-
-maq1CheckboxDF = requisicoes.getvalue('maq1_df') # checkbox df
-maq1CommandDF = requisicoes.getvalue('maq1-df') # textbox df
-if(maq1CheckboxDF):
-    if(maq1Command):
-        maq1Command += ' && '
-    maq1Command += requisicoes.getvalue('maq1_df') 
-    if(maq1CommandDF):
-        maq1Command += ' ' + requisicoes.getvalue('maq1-df')
-
-maq1CheckboxFINGER = requisicoes.getvalue('maq1_finger') # checkbox finger
-maq1CommandFINGER = requisicoes.getvalue('maq1-finger') # textbox finger
-if(maq1CheckboxFINGER):
-    if(maq1Command):
-        maq1Command += ' && '
-    maq1Command += requisicoes.getvalue('maq1_finger') 
-    if(maq1CommandFINGER):
-        maq1Command += ' ' + requisicoes.getvalue('maq1-finger')        
-        
-maq1CheckboxUPTIME = requisicoes.getvalue('maq1_uptime') # checkbox uptime
-maq1CommandUPTIME = requisicoes.getvalue('maq1-uptime') # textbox uptime
-if(maq1CheckboxUPTIME):
-    if(maq1Command):
-        maq1Command += ' && '
-    maq1Command += requisicoes.getvalue('maq1_uptime') 
-    if(maq1CommandUPTIME):
-        maq1Command += ' ' + requisicoes.getvalue('maq1-uptime')
-
-#verify if machine 1 is resquisited by the page
-requisitionMaq1 = (maq1CheckboxPS or maq1CheckboxUPTIME or maq1CheckboxFINGER or maq1CheckboxDF)
-
-# maquina 2
-maq2CheckboxPS = requisicoes.getvalue('maq2_ps') # checkbox ps
-maq2CommandPS = requisicoes.getvalue('maq2-ps') # textbox ps
-if(maq2CheckboxPS):
-    maq2Command += requisicoes.getvalue('maq2_ps')
-    if(maq2CommandPS):
-        maq2Command += ' ' + requisicoes.getvalue('maq2-ps')
-
-maq2CheckboxDF = requisicoes.getvalue('maq2_df') # checkbox df
-maq2CommandDF = requisicoes.getvalue('maq2-df') #textbox df
-if(maq2CheckboxDF):
-    if(maq2Command):
-        maq2Command += ' && '
-    maq2Command += requisicoes.getvalue('maq2_df') 
-    if(maq2CommandDF):
-        maq2Command += ' ' + requisicoes.getvalue('maq2-df')
-        
-maq2CheckboxFINGER = requisicoes.getvalue('maq2_finger') # checkbox finger
-maq2CommandFINGER = requisicoes.getvalue('maq2-finger') # textbox finger
-if(maq2CheckboxFINGER):
-    if(maq2Command):
-        maq2Command += ' && '
-    maq2Command += requisicoes.getvalue('maq2_finger') 
-    if(maq2CommandFINGER):
-        maq2Command += ' ' + requisicoes.getvalue('maq2-finger')  
-        
-maq2CheckboxUPTIME = requisicoes.getvalue('maq2_uptime') # checkbox uptime
-maq2CommandUPTIME = requisicoes.getvalue('maq2-uptime') # textbox uptime
-if(maq2CheckboxUPTIME):
-    if(maq2Command):
-        maq2Command += ' && '
-    maq2Command += requisicoes.getvalue('maq2_uptime') 
-    if(maq2CommandUPTIME):
-        maq2Command += ' ' + requisicoes.getvalue('maq2-uptime')
-
-#verify if machine 2 is resquisited by the page
-requisitionMaq2 = (maq2CheckboxPS or maq2CheckboxUPTIME or maq2CheckboxFINGER or maq2CheckboxDF)
-
-# maquina 3
-maq3CheckboxPS = requisicoes.getvalue('maq3_ps') # checkbox ps
-maq3CommandPS = requisicoes.getvalue('maq3-ps') # textbox ps
-if(maq3CheckboxPS):
-    maq3Command += requisicoes.getvalue('maq3_ps')
-    if(maq3CommandPS):
-        maq3Command += ' ' + requisicoes.getvalue('maq3-ps')
-
-maq3CheckboxDF = requisicoes.getvalue('maq3_df') # checkbox df
-maq3CommandDF = requisicoes.getvalue('maq3-df') # textbox df
-if(maq3CheckboxDF):
-    if(maq3Command):
-        maq3Command += ' && '
-    maq3Command += requisicoes.getvalue('maq3_df') 
-    if(maq3CommandDF):
-        maq3Command += ' ' + requisicoes.getvalue('maq3-df')
-        
-maq3CheckboxFINGER = requisicoes.getvalue('maq3_finger') # checkbox finger
-maq3CommandFINGER = requisicoes.getvalue('maq3-finger') # textbox finger
-if(maq3CheckboxFINGER):
-    if(maq3Command):
-        maq3Command += ' && '
-    maq3Command += requisicoes.getvalue('maq3_finger') 
-    if(maq3CommandFINGER):
-        maq3Command += ' ' + requisicoes.getvalue('maq3-finger')  
-        
-maq3CheckboxUPTIME = requisicoes.getvalue('maq3_uptime') # checkbox uptime
-maq3CommandUPTIME = requisicoes.getvalue('maq3-uptime') # textbox uptime
-if(maq3CheckboxUPTIME):
-    if(maq3Command):
-        maq3Command += ' && '
-    maq3Command += requisicoes.getvalue('maq3_uptime') 
-    if(maq3CommandUPTIME):
-        maq3Command += ' ' + requisicoes.getvalue('maq3-uptime')
-
-#verify if machine 3 is resquisited by the page
-requisitionMaq3 = (maq3CheckboxPS or maq3CheckboxUPTIME or maq3CheckboxFINGER or maq3CheckboxDF)
+payloadMaq1 = ''
+payloadMaq2 = ''
+payloadMaq3 = ''
 
 serverName = 'redesServer'
 
+# se comando existe inicia thread
+# precisa fazer verificação de comandos que PRECISAM de flags e que não
+if(commandMaq1):
+    if(commandMaq1 & 1 == 1):
+        payloadMaq1 = 'ps ' + getFlagsHtml('1', 'ps', req)
+    # inicia thread
+    if(commandMaq1 & 2 == 2):
+        payloadMaq1 = 'ds ' + getFlagsHtml('1', 'df', req)
+    if(commandMaq1 & 4 == 4):
+        payloadMaq1 = 'finger ' + getFlagsHtml('1', 'finger', req)
+    if(commandMaq1 & 8 == 8):
+        payloadMaq1 = 'uptime ' + getFlagsHtml('1', 'uptime', req)
 
-
-#Criacao dos sockets
-#only if its needed
-#if(requisitionMaq1):
-
-
-if(requisitionMaq2):
-    daemonCliente2 = socket(AF_INET, SOCK_STREAM)
-    daemonCliente2.connect(("127.0.0.1", 9002))
-
-if(requisitionMaq3):
-    daemonCliente3 = socket(AF_INET, SOCK_STREAM)
-    daemonCliente3.connect(("127.0.0.1", 9003))
-
-send_command
 
 #Eventos para enviar as mensagens
 modifiedSentence1 = 'Maquina 1:<br><br>'
