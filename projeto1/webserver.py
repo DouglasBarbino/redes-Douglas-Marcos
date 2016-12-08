@@ -11,14 +11,17 @@ slides do capitulo 2 do Kurose'''
 
 #Funcao para verificar se tal comando foi requerido para ser executado no daemon        
 from socket import *
-from threading import *
+from queue import Queue
+import threading
 import cgi, cgitb
 import string
 import time
 import struct
-import thread
 
 BUFFER_SIZE = 1024
+string_lock = threading.Lock()
+q = Queue()
+global sentence = ''
 
 # simplifying this html stuff (too long and too ugly)
 def verifyCheckboxHtml(maqNumber, req):
@@ -90,49 +93,70 @@ def recv_all(socket, timeout=2):
     return ''.join(full_data)
 
 #threading send function
-def send_command(socket, command, flags):
+def send_command(socket, command, machine):
+    #remove duplicated spaces
+    command = " ".join(command.split())
+    #remove weird spaces
+    command = command.strip()
+    # struct needs a bytes object
+    commandToSend = bytes(command, 'utf-8')
+
+
     #the following comments are flags for the pack and unpack proccess
-    header_version              =   2                               #B - unsigned char
+    header_version              =   2                               #B - unsigned char - size 1
     header_ihdl                 =   8                               #B - unsigned char
     header_tos                  =   0                               #B - unsigned char
-    header_total_length         =   0                               #H - unsigned short
+    header_total_length         =   0                               #H - unsigned short - size 2
     header_identification       =   0                               #H - unsigned short
     header_flags                =   000                             #H - unsigned short
     header_fragment             =   0                               #H - unsigned short
     header_ttl                  =   255                             #B - unsigned char
     header_protocol             =   command                         #B - unsigned char
     header_checksum             =   0 #adjust later                 #H - unsgined short
-    header_sourceaddress        =   socket.getsockname()            #4s - 4 string chars
-    header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #4s - 4 string chars
-    header_options              =   command + " " + flags           #xs - x is the number of chars
+    header_sourceaddress        =   socket.getsockname()            #4s - 4 string chars - 4
+    header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #4s - 4 string chars - 4
+    header_options              =   commandToSend                   #xs - x is the number of chars
 
-    #remove duplicated spaces
-    flags = " ".join(flags.split())
-    #remove weird spaces
-    flags = flags.strip()
+    
 
     #get size of the amount of flags
-    flags_pack = '' + len(flags)
+    flags_pack = '' + len(commandToSend)
     flags_pack = '!BBBHHHHBBH4s4s' + flags_pack + 's'
 
-    ip_header = pack(flags_pack, header_version, header_ihdl, 
+    ip_header = struct.pack(flags_pack, header_version, header_ihdl, 
                 header_tos, header_total_length, header_identification,
                 header_flags, header_fragment, header_ttl, header_protocol,
                 header_checksum, header_sourceaddress, header_destinationaddress,
-                header_options, flags)
+                header_options)
 
     socket.send(ip_header).encode()
+    
+    pack = recv_all(socket)
 
-    return
+    # ler so ate parte da string de unpack para conseguir o tamanho que esta em header_options
+    flags_pack, header_version, header_ihdl, \
+                header_tos, header_total_length, header_identification, \
+                header_flags, header_fragment, header_ttl, header_protocol, \
+                header_checksum, header_sourceaddress, header_destinationaddress, \
+                header_options \
+                = struct.unpack('!BBBHHHHBBH4s4sh', pack[:25])
+
+    #atraves do header options obter o resto da string 25 bytes pra frente
+    result = struct.unpack('%ds' % header_options, pack[25:])
+    result.decode("utf-8")
+
+    with string_lock:
+        sentence += machine + ':<br>' + result + '<br>'
+
+####### MAIN ########
+
+
 
 #Lista dos comandos
 comandos = ['ps', 'df', 'finger', 'uptime']
 
 # contador de maquinas para possivel threading
 # machines_to_use = 0
-
-# string que recebe as mensagens
-sentence = ''
 
 cgitb.enable()
 
@@ -153,88 +177,141 @@ serverName = 'redesServer'
 
 # se comando existe inicia thread
 # precisa fazer verificacao de comandos que PRECISAM de flags e que nao
+# tem como cortar isso?
 if(commandMaq1):
+    daemonCliente1 = socket(AF_INET, SOCK_STREAM)
+    daemonCliente1.connect(("127.0.0.1", 9001))
+
     if(commandMaq1 & 1 == 1):
         flagsHtml = getFlagsHtml('1', 'ps', req)
         if (flagsHtml != None):
             payloadMaq1 = 'ps ' + flagsHtml
         else:
             payloadMaq1 = 'ps'
-    # inicia thread
+        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq1 & 2 == 2):
         flagsHtml = getFlagsHtml('1', 'df', req)
         if (flagsHtml != None):
             payloadMaq1 = 'df ' + flagsHtml
         else:
             payloadMaq1 = 'df'
+        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq1 & 4 == 4):
         flagsHtml = getFlagsHtml('1', 'finger', req)
         if (flagsHtml != None):
             payloadMaq1 = 'finger ' + flagsHtml
         else:
             payloadMaq1 = 'finger'
+        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq1 & 8 == 8):
         flagsHtml = getFlagsHtml('1', 'uptime', req)
         if (flagsHtml != None):
             payloadMaq1 = 'uptime ' + flagsHtml
         else:
             payloadMaq1 = 'uptime'
-            
+        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
+        t.daemon = True
+        t.start()
+
 if(commandMaq2):
+    daemonCliente2 = socket(AF_INET, SOCK_STREAM)
+    daemonCliente2.connect(("127.0.0.1", 9002))
+
     if(commandMaq2 & 1 == 1):
         flagsHtml = getFlagsHtml('2', 'ps', req)
         if (flagsHtml != None):
             payloadMaq2 = 'ps ' + flagsHtml
         else:
             payloadMaq2 = 'ps'
-    # inicia thread
+        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq2 & 2 == 2):
         flagsHtml = getFlagsHtml('2', 'df', req)
         if (flagsHtml != None):
             payloadMaq2 = 'df ' + flagsHtml
         else:
             payloadMaq2 = 'df'
+        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq2 & 4 == 4):
         flagsHtml = getFlagsHtml('2', 'finger', req)
         if (flagsHtml != None):
             payloadMaq2 = 'finger ' + flagsHtml
         else:
             payloadMaq2 = 'finger'
+        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq2 & 8 == 8):
         flagsHtml = getFlagsHtml('2', 'uptime', req)
         if (flagsHtml != None):
             payloadMaq2 = 'uptime ' + flagsHtml
         else:
             payloadMaq2 = 'uptime'
-            
+        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
+        t.daemon = True
+        t.start()
+
 if(commandMaq3):
+    daemonCliente3 = socket(AF_INET, SOCK_STREAM)
+    daemonCliente3.connect(("127.0.0.1", 9002))
+    
     if(commandMaq3 & 1 == 1):
         flagsHtml = getFlagsHtml('3', 'ps', req)
         if (flagsHtml != None):
             payloadMaq3 = 'ps ' + flagsHtml
         else:
             payloadMaq3 = 'ps'
-    # inicia thread
+        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq3 & 2 == 2):
         flagsHtml = getFlagsHtml('3', 'df', req)
         if (flagsHtml != None):
             payloadMaq3 = 'df ' + flagsHtml
         else:
             payloadMaq3 = 'df'
+        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq3 & 4 == 4):
         flagsHtml = getFlagsHtml('3', 'finger', req)
         if (flagsHtml != None):
             payloadMaq3 = 'finger ' + flagsHtml
         else:
             payloadMaq3 = 'finger'
+        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
+        t.daemon = True
+        t.start()
+
     if(commandMaq3 & 8 == 8):
         flagsHtml = getFlagsHtml('3', 'uptime', req)
         if (flagsHtml != None):
             payloadMaq3 = 'uptime ' + flagsHtml
         else:
             payloadMaq3 = 'uptime'
+        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
+        t.daemon = True
+        t.start()
 
 #Eventos para enviar as mensagens
+
 modifiedSentence1 = 'Maquina 1:<br><br>'
 if(maq1Command):
     daemonCliente1.send(maq1Command.encode())
