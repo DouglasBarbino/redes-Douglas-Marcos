@@ -140,29 +140,99 @@ cgitb.enable()
 
 req = cgi.FieldStorage()     
 
-commandMaq1 = verifyHtml('1', req)
-commandMaq2 = verifyHtml('2', req)
-commandMaq3 = verifyHtml('3', req)
+commandMaq1 = verifyCheckboxHtml('1', req)
+commandMaq2 = verifyCheckboxHtml('2', req)
+commandMaq3 = verifyCheckboxHtml('3', req)
 
 payloadMaq1 = ''
 payloadMaq2 = ''
 payloadMaq3 = ''
+flagsHtml = ''
 
 serverName = 'redesServer'
 
 # se comando existe inicia thread
-# precisa fazer verificação de comandos que PRECISAM de flags e que não
+# precisa fazer verificacao de comandos que PRECISAM de flags e que nao
 if(commandMaq1):
     if(commandMaq1 & 1 == 1):
-        payloadMaq1 = 'ps ' + getFlagsHtml('1', 'ps', req)
+        flagsHtml = getFlagsHtml('1', 'ps', req)
+        if (flagsHtml != None):
+            payloadMaq1 = 'ps ' + flagsHtml
+        else:
+            payloadMaq1 = 'ps'
     # inicia thread
     if(commandMaq1 & 2 == 2):
-        payloadMaq1 = 'ds ' + getFlagsHtml('1', 'df', req)
+        flagsHtml = getFlagsHtml('1', 'df', req)
+        if (flagsHtml != None):
+            payloadMaq1 = 'df ' + flagsHtml
+        else:
+            payloadMaq1 = 'df'
     if(commandMaq1 & 4 == 4):
-        payloadMaq1 = 'finger ' + getFlagsHtml('1', 'finger', req)
+        flagsHtml = getFlagsHtml('1', 'finger', req)
+        if (flagsHtml != None):
+            payloadMaq1 = 'finger ' + flagsHtml
+        else:
+            payloadMaq1 = 'finger'
     if(commandMaq1 & 8 == 8):
-        payloadMaq1 = 'uptime ' + getFlagsHtml('1', 'uptime', req)
-
+        flagsHtml = getFlagsHtml('1', 'uptime', req)
+        if (flagsHtml != None):
+            payloadMaq1 = 'uptime ' + flagsHtml
+        else:
+            payloadMaq1 = 'uptime'
+            
+if(commandMaq2):
+    if(commandMaq2 & 1 == 1):
+        flagsHtml = getFlagsHtml('2', 'ps', req)
+        if (flagsHtml != None):
+            payloadMaq2 = 'ps ' + flagsHtml
+        else:
+            payloadMaq2 = 'ps'
+    # inicia thread
+    if(commandMaq2 & 2 == 2):
+        flagsHtml = getFlagsHtml('2', 'df', req)
+        if (flagsHtml != None):
+            payloadMaq2 = 'df ' + flagsHtml
+        else:
+            payloadMaq2 = 'df'
+    if(commandMaq2 & 4 == 4):
+        flagsHtml = getFlagsHtml('2', 'finger', req)
+        if (flagsHtml != None):
+            payloadMaq2 = 'finger ' + flagsHtml
+        else:
+            payloadMaq2 = 'finger'
+    if(commandMaq2 & 8 == 8):
+        flagsHtml = getFlagsHtml('2', 'uptime', req)
+        if (flagsHtml != None):
+            payloadMaq2 = 'uptime ' + flagsHtml
+        else:
+            payloadMaq2 = 'uptime'
+            
+if(commandMaq3):
+    if(commandMaq3 & 1 == 1):
+        flagsHtml = getFlagsHtml('3', 'ps', req)
+        if (flagsHtml != None):
+            payloadMaq3 = 'ps ' + flagsHtml
+        else:
+            payloadMaq3 = 'ps'
+    # inicia thread
+    if(commandMaq3 & 2 == 2):
+        flagsHtml = getFlagsHtml('3', 'df', req)
+        if (flagsHtml != None):
+            payloadMaq3 = 'df ' + flagsHtml
+        else:
+            payloadMaq3 = 'df'
+    if(commandMaq3 & 4 == 4):
+        flagsHtml = getFlagsHtml('3', 'finger', req)
+        if (flagsHtml != None):
+            payloadMaq3 = 'finger ' + flagsHtml
+        else:
+            payloadMaq3 = 'finger'
+    if(commandMaq3 & 8 == 8):
+        flagsHtml = getFlagsHtml('3', 'uptime', req)
+        if (flagsHtml != None):
+            payloadMaq3 = 'uptime ' + flagsHtml
+        else:
+            payloadMaq3 = 'uptime'
 
 #Eventos para enviar as mensagens
 modifiedSentence1 = 'Maquina 1:<br><br>'
@@ -196,3 +266,4 @@ print("Content-Type: text/html;charset=utf-8\r\n\r\n")
 print(modifiedSentence1)
 print(modifiedSentence2)
 print(modifiedSentence3)
+print(payloadMaq1)
