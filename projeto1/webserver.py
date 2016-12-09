@@ -9,6 +9,17 @@ Created on Fri Nov 11 13:27:10 2016
 '''Codigo de criacao e encerramento dos sockets extraido dos
 slides do capitulo 2 do Kurose'''
 
+"""
+TODO: 
+    - need to verify checksum
+    - need to verify if flags is 000 or 111
+    - test everything
+    - simplify the creation and connection of packets
+    - simplify distributing commands through threads its too bloated
+    - check if daemon still alright
+    - alter how commands are being verified if they are valid, uptime for exampel
+"""
+
 #Funcao para verificar se tal comando foi requerido para ser executado no daemon        
 from socket import *
 from queue import Queue
@@ -94,6 +105,7 @@ def recv_all(socket, timeout=2):
 #threading send function
 def send_command(socket, command, machine):
     #the following comments are flags for the pack and unpack proccess
+    #we cut struct later we trim the code again
     header_version              =   2                               #B - unsigned char - size 1
     header_ihdl                 =   8                               #B - unsigned char
     header_tos                  =   0                               #B - unsigned char
@@ -138,7 +150,6 @@ comandos = ['ps', 'df', 'finger', 'uptime']
 cgitb.enable()
 
 # we fancy in html verification now
-
 req = cgi.FieldStorage()     
 
 commandMaq1 = verifyCheckboxHtml('1', req)
