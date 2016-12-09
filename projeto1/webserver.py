@@ -16,12 +16,11 @@ import threading
 import cgi, cgitb
 import string
 import time
-import struct
 
 BUFFER_SIZE = 1024
 string_lock = threading.Lock()
 q = Queue()
-global sentence = ''
+sentence = ''
 
 # simplifying this html stuff (too long and too ugly)
 def verifyCheckboxHtml(maqNumber, req):
@@ -49,7 +48,7 @@ def verifyCheckboxHtml(maqNumber, req):
 def getFlagsHtml(maqNumber, command, req):
     return req.getvalue('maq' + maqNumber + '-' + command)
 
-#works don't ask me why
+#works dont ask me why or how
 def crcSixteen(buffer, crc = 0, poly = 0xa001):
     buffSize = len(buffer)
     
@@ -94,14 +93,6 @@ def recv_all(socket, timeout=2):
 
 #threading send function
 def send_command(socket, command, machine):
-    #remove duplicated spaces
-    command = " ".join(command.split())
-    #remove weird spaces
-    command = command.strip()
-    # struct needs a bytes object
-    commandToSend = bytes(command, 'utf-8')
-
-
     #the following comments are flags for the pack and unpack proccess
     header_version              =   2                               #B - unsigned char - size 1
     header_ihdl                 =   8                               #B - unsigned char
@@ -115,48 +106,34 @@ def send_command(socket, command, machine):
     header_checksum             =   0 #adjust later                 #H - unsgined short
     header_sourceaddress        =   socket.getsockname()            #4s - 4 string chars - 4
     header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #4s - 4 string chars - 4
-    header_options              =   commandToSend                   #xs - x is the number of chars
+    header_options              =   command                         #xs - x is the number of chars
 
     
-
-    #get size of the amount of flags
-    flags_pack = '' + len(commandToSend)
-    flags_pack = '!BBBHHHHBBH4s4s' + flags_pack + 's'
-
-    ip_header = struct.pack(flags_pack, header_version, header_ihdl, 
-                header_tos, header_total_length, header_identification,
-                header_flags, header_fragment, header_ttl, header_protocol,
-                header_checksum, header_sourceaddress, header_destinationaddress,
-                header_options)
-
+    ip_header = (header_version, header_ihdl, header_tos, header_total_length,
+                header_identification, header_flags, header_fragment, header_ttl, header_protocol,
+                header_checksum, header_sourceaddress, header_destinationaddress, header_options)
+    
     socket.send(ip_header).encode()
     
-    pack = recv_all(socket)
+    pack = socket.recv(BUFF_SIZE)
+    result = recv_all(socket)
 
-    # ler so ate parte da string de unpack para conseguir o tamanho que esta em header_options
-    flags_pack, header_version, header_ihdl, \
-                header_tos, header_total_length, header_identification, \
-                header_flags, header_fragment, header_ttl, header_protocol, \
-                header_checksum, header_sourceaddress, header_destinationaddress, \
-                header_options \
-                = struct.unpack('!BBBHHHHBBH4s4sh', pack[:25])
-
-    #atraves do header options obter o resto da string 25 bytes pra frente
-    result = struct.unpack('%ds' % header_options, pack[25:])
-    result.decode("utf-8")
-
+    #append is faster than +=
     with string_lock:
-        sentence += machine + ':<br>' + result + '<br>'
+        sentence.append(machine)
+        sentence.append(': ')
+        sentence.append(machine)
+        sentence.append('<br>Command: ')
+        sentence.append(command)
+        sentence.append('<br>Result: <br>')
+        sentence.append(result)
+        sentence.append('<br>')
+
+
 
 ####### MAIN ########
-
-
-
 #Lista dos comandos
 comandos = ['ps', 'df', 'finger', 'uptime']
-
-# contador de maquinas para possivel threading
-# machines_to_use = 0
 
 cgitb.enable()
 
@@ -311,36 +288,15 @@ if(commandMaq3):
         t.start()
 
 #Eventos para enviar as mensagens
-
-modifiedSentence1 = 'Maquina 1:<br><br>'
-if(maq1Command):
-    daemonCliente1.send(maq1Command.encode())
-    sentence = daemonCliente1.recv(1024)
-    modifiedSentence1 += sentence.decode() + '<br><br>'
-
-modifiedSentence2 = 'Maquina 2:<br><br>'
-if(maq2Command):
-    daemonCliente2.send(maq2Command.encode())
-    sentence = daemonCliente2.recv(1024)
-    modifiedSentence2 += sentence.decode() + '<br><br>'
-
-modifiedSentence3 = 'Maquina 3:<br><br>'
-if(maq3Command):
-    daemonCliente3.send(maq3Command.encode())
-    sentence = daemonCliente3.recv(1024)
-    modifiedSentence3 += sentence.decode() + '<br><br>'
+sentence = sentence.replace('\n', '<br />')
 
 #Encerrando os sockets
-daemonCliente1.close()
-daemonCliente2.close()
-daemonCliente3.close()
-
-modifiedSentence1 = modifiedSentence1.replace('\n', '<br />')
-modifiedSentence2 = modifiedSentence2.replace('\n', '<br />')
-modifiedSentence3 = modifiedSentence3.replace('\n', '<br />')
+if(commandMaq1):
+    daemonCliente1.close()
+if(commandMaq2):
+    daemonCliente2.close()
+if(commandMaq3):
+    daemonCliente3.close()
 
 print("Content-Type: text/html;charset=utf-8\r\n\r\n")
-print(modifiedSentence1)
-print(modifiedSentence2)
-print(modifiedSentence3)
-print(payloadMaq1)
+print(sentence)
