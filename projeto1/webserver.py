@@ -106,26 +106,26 @@ def recv_all(socket, timeout=2):
 def send_command(socket, command, machine):
     #the following comments are flags for the pack and unpack proccess
     #we cut struct later we trim the code again
-    header_version              =   2                               #B - unsigned char - size 1
-    header_ihdl                 =   8                               #B - unsigned char
-    header_tos                  =   0                               #B - unsigned char
-    header_total_length         =   0                               #H - unsigned short - size 2
-    header_identification       =   0                               #H - unsigned short
-    header_flags                =   000                             #H - unsigned short
-    header_fragment             =   0                               #H - unsigned short
-    header_ttl                  =   255                             #B - unsigned char
-    header_protocol             =   command                         #B - unsigned char
-    header_checksum             =   0 #adjust later                 #H - unsgined short
-    header_sourceaddress        =   socket.getsockname()            #4s - 4 string chars - 4
-    header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #4s - 4 string chars - 4
-    header_options              =   command                         #xs - x is the number of chars
+    header_version              =   2                               #0
+    header_ihdl                 =   8                               #1
+    header_tos                  =   0                               #2
+    header_total_length         =   0                               #3
+    header_identification       =   0                               #4
+    header_flags                =   000                             #5
+    header_fragment             =   0                               #6
+    header_ttl                  =   255                             #7
+    header_protocol             =   command                         #8
+    header_checksum             =   0 #adjust later                 #9
+    header_sourceaddress        =   socket.getsockname()            #10
+    header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #11
+    header_options              =   command                         #12
 
     
     ip_header = (header_version, header_ihdl, header_tos, header_total_length,
                 header_identification, header_flags, header_fragment, header_ttl, header_protocol,
                 header_checksum, header_sourceaddress, header_destinationaddress, header_options)
     
-    socket.send(ip_header).encode()
+    socket.send(ip_header)
     
     pack = socket.recv(BUFF_SIZE)
     result = recv_all(socket)
