@@ -22,7 +22,7 @@ TODO:
 
 #Funcao para verificar se tal comando foi requerido para ser executado no daemon        
 from socket import *
-from queue import Queue
+#from queue import Queue
 import threading
 import cgi, cgitb
 import string
@@ -30,7 +30,7 @@ import time
 
 BUFFER_SIZE = 1024
 string_lock = threading.Lock()
-q = Queue()
+#q = Queue()
 sentence = ''
 
 # simplifying this html stuff (too long and too ugly)
@@ -132,20 +132,17 @@ def send_command(socket, command, machine):
 
     #append is faster than +=
     with string_lock:
-        sentence.append(machine)
-        sentence.append(': ')
-        sentence.append(machine)
-        sentence.append('<br>Command: ')
-        sentence.append(command)
-        sentence.append('<br>Result: <br>')
-        sentence.append(result)
-        sentence.append('<br>')
-
+        sentence += machine
+        sentence += ': '
+        sentence += machine
+        sentence += '<br>Command: '
+        sentence += command
+        sentence += '<br>Result: <br>'
+        sentence += result
+        sentence += '<br>'
 
 
 ####### MAIN ########
-#Lista dos comandos
-comandos = ['ps', 'df', 'finger', 'uptime']
 
 cgitb.enable()
 
