@@ -20,10 +20,13 @@ BUFF_SIZE = 1024
 
 def handler(clientsock, addr):
     while True:
-        data = clientsock.recv(BUFF_SIZE).decode()
-        if data != '':
-            print('commands received: ' + data)
-            executionOfCommands = subprocess.Popen(data, stdout=subprocess.PIPE, shell=True)
+        data = clientsock.recv(BUFF_SIZE)
+        command = clientsock.recv(BUFF_SIZE).decode()
+        #if data != '':
+        if command != '':
+            #header = unpack('!BBBHHHHBBHLLL', data)
+            print('commands received: ' + command)
+            executionOfCommands = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
             (data, err) = executionOfCommands.communicate()
             print('output generated: ' + data + '\r')
             clientsock.send(data)
@@ -46,7 +49,8 @@ daemonServer.listen(1)
 #Eventos
 while True:
     clientsock, addr = daemonServer.accept()
-    thread.start_new_thread(handler, (clientsock, addr))
+    #thread.start_new_thread(handler, (clientsock, addr))
+    handler(clientsock, addr)
     #Para pegar a execucao do comando
     #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
     #talvez eu preferisse o pexpect

@@ -22,14 +22,15 @@ TODO:
 
 #Funcao para verificar se tal comando foi requerido para ser executado no daemon        
 from socket import *
+from struct import *
 #from queue import Queue
 import threading
 import cgi, cgitb
 import string
 import time
 
-BUFFER_SIZE = 1024
-string_lock = threading.Lock()
+BUFF_SIZE = 1024
+#string_lock = threading.Lock()
 #q = Queue()
 sentence = ''
 
@@ -106,40 +107,43 @@ def recv_all(socket, timeout=2):
 def send_command(socket, command, machine):
     #the following comments are flags for the pack and unpack proccess
     #we cut struct later we trim the code again
-    header_version              =   2                               #0
-    header_ihdl                 =   8                               #1
-    header_tos                  =   0                               #2
-    header_total_length         =   0                               #3
-    header_identification       =   0                               #4
-    header_flags                =   000                             #5
-    header_fragment             =   0                               #6
-    header_ttl                  =   255                             #7
-    header_protocol             =   command                         #8
-    header_checksum             =   0 #adjust later                 #9
-    header_sourceaddress        =   socket.getsockname()            #10
-    header_destinationaddress   =   socket.inet_aton ('127.0.0.1')  #11
-    header_options              =   command                         #12
+    header_version              =   2                                   #0
+    header_ihdl                 =   8                                   #1
+    header_tos                  =   0                                   #2
+    header_total_length         =   0                                   #3
+    header_identification       =   0                                   #4
+    header_flags                =   000                                 #5
+    header_fragment             =   0                                   #6
+    header_ttl                  =   255                                 #7
+    header_protocol             =   0 #adjust later                     #8
+    header_checksum             =   0 #adjust later                     #9
+    #header_sourceaddress        =   socket.getsockname()               #10
+    header_sourceaddress        =   '0b01111111000000000000000000000001'  #Inteiro de 127.0.0.1   #10 2130706433
+    #header_destinationaddress   =   socket.inet_aton ('127.0.0.1')     #11 - socket.inet_aton nao funciona
+    header_destinationaddress   =   '0b01111111000000000000000000000001'                         #11 - '0b01111111000000000000000000000001' 
+    header_options              =   0 #adjust later                     #12
 
-    
-    ip_header = (header_version, header_ihdl, header_tos, header_total_length,
+    #Tem que ser uma struct binaria
+    ip_header = pack('!BBBHHHHBBHLLL', header_version, header_ihdl, header_tos, header_total_length,
                 header_identification, header_flags, header_fragment, header_ttl, header_protocol,
                 header_checksum, header_sourceaddress, header_destinationaddress, header_options)
     
     socket.send(ip_header)
+    socket.send(command.encode())
     
-    pack = socket.recv(BUFF_SIZE)
+    packReceive = socket.recv(BUFF_SIZE)
     result = recv_all(socket)
 
     #append is faster than +=
-    with string_lock:
-        sentence += machine
-        sentence += ': '
-        sentence += machine
-        sentence += '<br>Command: '
-        sentence += command
-        sentence += '<br>Result: <br>'
-        sentence += result
-        sentence += '<br>'
+    #with string_lock:
+    sentence += machine
+    sentence += ': '
+    sentence += machine
+    sentence += '<br>Command: '
+    sentence += command
+    sentence += '<br>Result: <br>'
+    sentence += result
+    sentence += '<br>'
 
 
 ####### MAIN ########
@@ -173,9 +177,10 @@ if(commandMaq1):
             payloadMaq1 = 'ps ' + flagsHtml
         else:
             payloadMaq1 = 'ps'
-        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
+        '''t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1'))
         t.daemon = True
-        t.start()
+        t.start()'''
+        send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
     if(commandMaq1 & 2 == 2):
         flagsHtml = getFlagsHtml('1', 'df', req)
@@ -183,9 +188,7 @@ if(commandMaq1):
             payloadMaq1 = 'df ' + flagsHtml
         else:
             payloadMaq1 = 'df'
-        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
     if(commandMaq1 & 4 == 4):
         flagsHtml = getFlagsHtml('1', 'finger', req)
@@ -193,9 +196,7 @@ if(commandMaq1):
             payloadMaq1 = 'finger ' + flagsHtml
         else:
             payloadMaq1 = 'finger'
-        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
     if(commandMaq1 & 8 == 8):
         flagsHtml = getFlagsHtml('1', 'uptime', req)
@@ -203,9 +204,7 @@ if(commandMaq1):
             payloadMaq1 = 'uptime ' + flagsHtml
         else:
             payloadMaq1 = 'uptime'
-        t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
 if(commandMaq2):
     daemonCliente2 = socket(AF_INET, SOCK_STREAM)
@@ -217,9 +216,10 @@ if(commandMaq2):
             payloadMaq2 = 'ps ' + flagsHtml
         else:
             payloadMaq2 = 'ps'
-        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
+        '''t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2'))
         t.daemon = True
-        t.start()
+        t.start()'''
+        send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
     if(commandMaq2 & 2 == 2):
         flagsHtml = getFlagsHtml('2', 'df', req)
@@ -227,9 +227,7 @@ if(commandMaq2):
             payloadMaq2 = 'df ' + flagsHtml
         else:
             payloadMaq2 = 'df'
-        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
     if(commandMaq2 & 4 == 4):
         flagsHtml = getFlagsHtml('2', 'finger', req)
@@ -237,9 +235,7 @@ if(commandMaq2):
             payloadMaq2 = 'finger ' + flagsHtml
         else:
             payloadMaq2 = 'finger'
-        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
     if(commandMaq2 & 8 == 8):
         flagsHtml = getFlagsHtml('2', 'uptime', req)
@@ -247,9 +243,7 @@ if(commandMaq2):
             payloadMaq2 = 'uptime ' + flagsHtml
         else:
             payloadMaq2 = 'uptime'
-        t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
 if(commandMaq3):
     daemonCliente3 = socket(AF_INET, SOCK_STREAM)
@@ -261,9 +255,10 @@ if(commandMaq3):
             payloadMaq3 = 'ps ' + flagsHtml
         else:
             payloadMaq3 = 'ps'
-        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
+        '''t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3'))
         t.daemon = True
-        t.start()
+        t.start()'''
+        send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
     if(commandMaq3 & 2 == 2):
         flagsHtml = getFlagsHtml('3', 'df', req)
@@ -271,9 +266,7 @@ if(commandMaq3):
             payloadMaq3 = 'df ' + flagsHtml
         else:
             payloadMaq3 = 'df'
-        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
     if(commandMaq3 & 4 == 4):
         flagsHtml = getFlagsHtml('3', 'finger', req)
@@ -281,9 +274,7 @@ if(commandMaq3):
             payloadMaq3 = 'finger ' + flagsHtml
         else:
             payloadMaq3 = 'finger'
-        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
     if(commandMaq3 & 8 == 8):
         flagsHtml = getFlagsHtml('3', 'uptime', req)
@@ -291,9 +282,7 @@ if(commandMaq3):
             payloadMaq3 = 'uptime ' + flagsHtml
         else:
             payloadMaq3 = 'uptime'
-        t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3',))
-        t.daemon = True
-        t.start()
+        send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
 #Eventos para enviar as mensagens
 sentence = sentence.replace('\n', '<br />')
