@@ -105,6 +105,7 @@ def recv_all(socket, timeout=2):
 
 #threading send function
 def send_command(socket, command, machine):
+    global sentence 
     #the following comments are flags for the pack and unpack proccess
     #we cut struct later we trim the code again
     header_version              =   2                                   #0
@@ -118,9 +119,9 @@ def send_command(socket, command, machine):
     header_protocol             =   0 #adjust later                     #8
     header_checksum             =   0 #adjust later                     #9
     #header_sourceaddress        =   socket.getsockname()               #10
-    header_sourceaddress        =   '0b01111111000000000000000000000001'  #Inteiro de 127.0.0.1   #10 2130706433
+    header_sourceaddress        =   2130706433  #Inteiro de 127.0.0.1   #10 2130706433
     #header_destinationaddress   =   socket.inet_aton ('127.0.0.1')     #11 - socket.inet_aton nao funciona
-    header_destinationaddress   =   '0b01111111000000000000000000000001'                         #11 - '0b01111111000000000000000000000001' 
+    header_destinationaddress   =   2130706433                          #11 - '0b01111111000000000000000000000001' 
     header_options              =   0 #adjust later                     #12
 
     #Tem que ser uma struct binaria
@@ -132,7 +133,8 @@ def send_command(socket, command, machine):
     socket.send(command.encode())
     
     packReceive = socket.recv(BUFF_SIZE)
-    result = recv_all(socket)
+    receive = recv_all(socket)
+    result = packReceive.decode()
 
     #append is faster than +=
     #with string_lock:

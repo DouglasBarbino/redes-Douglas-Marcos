@@ -11,6 +11,7 @@ slides do capitulo 2 do Kurose'''
 
 import sys
 from socket import *
+from struct import *
 import subprocess
 import argparse
 import string
@@ -22,6 +23,21 @@ def handler(clientsock, addr):
     while True:
         data = clientsock.recv(BUFF_SIZE)
         command = clientsock.recv(BUFF_SIZE).decode()
+        #Descompactando o cabecalho
+        header = unpack('!BBBHHHHBBHLLL', data)
+        header_version              =   header[0]                           #0
+        header_ihdl                 =   header[1]                           #1
+        header_tos                  =   header[2]                           #2
+        header_total_length         =   header[3]                           #3
+        header_identification       =   header[4]                           #4
+        header_flags                =   header[5]                           #5
+        header_fragment             =   header[6]                           #6
+        header_ttl                  =   header[7]                           #7
+        header_protocol             =   header[8]                           #8
+        header_checksum             =   header[9]                           #9
+        header_sourceaddress        =   header[10]                          #10 
+        header_destinationaddress   =   header[11]                          #11 - '0b01111111000000000000000000000001' 
+        header_options              =   header[12]                          #12
         #if data != '':
         if command != '':
             #header = unpack('!BBBHHHHBBHLLL', data)
