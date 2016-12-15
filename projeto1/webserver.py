@@ -106,6 +106,7 @@ def recv_all(socket, timeout=2):
 #threading send function
 def send_command(socket, command, machine):
     global sentence 
+    header = ''
     #the following comments are flags for the pack and unpack proccess
     #we cut struct later we trim the code again
     header_version              =   2                                   #0
@@ -132,9 +133,27 @@ def send_command(socket, command, machine):
     socket.send(ip_header)
     socket.send(command.encode())
     
+    headerReceive = socket.recv(BUFF_SIZE)
+    
+    #Descompactando o cabecalho
+    header = unpack('!BBBHHHHBBHLLL', headerReceive)
+    header_version              =   header[0]                           #0
+    header_ihdl                 =   header[1]                           #1
+    header_tos                  =   header[2]                           #2
+    header_total_length         =   header[3]                           #3
+    header_identification       =   header[4]                           #4
+    header_flags                =   header[5]                           #5
+    header_fragment             =   header[6]                           #6
+    header_ttl                  =   header[7]                           #7
+    header_protocol             =   header[8]                           #8
+    header_checksum             =   header[9]                           #9
+    header_sourceaddress        =   header[10]                          #10 
+    header_destinationaddress   =   header[11]                          #11 - '0b01111111000000000000000000000001' 
+    header_options              =   header[12]                          #12
+    
     packReceive = socket.recv(BUFF_SIZE)
-    receive = recv_all(socket)
     result = packReceive.decode()
+    receive = recv_all(socket)
 
     #append is faster than +=
     #with string_lock:
