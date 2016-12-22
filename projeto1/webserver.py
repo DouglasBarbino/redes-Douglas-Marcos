@@ -13,17 +13,14 @@ slides do capitulo 2 do Kurose'''
 TODO: 
     - need to verify checksum
     - need to verify if flags is 000 or 111
-    - test everything
     - simplify the creation and connection of packets
     - simplify distributing commands through threads its too bloated
-    - check if daemon still alright
     - alter how commands are being verified if they are valid, uptime for exampel
 """
 
 #Funcao para verificar se tal comando foi requerido para ser executado no daemon        
 from socket import *
 from struct import *
-#from queue import Queue
 import threading
 import cgi, cgitb
 import string
@@ -31,8 +28,8 @@ import time
 
 BUFF_SIZE = 1024
 #string_lock = threading.Lock()
-#q = Queue()
 sentence = ''
+protocolHeader = 0
 
 # simplifying this html stuff (too long and too ugly)
 def verifyCheckboxHtml(maqNumber, req):
@@ -117,12 +114,12 @@ def send_command(socket, command, machine):
     header_flags                =   000                                 #5
     header_fragment             =   0                                   #6
     header_ttl                  =   255                                 #7
-    header_protocol             =   0 #adjust later                     #8
+    header_protocol             =   protocolHeader                      #8
     header_checksum             =   0 #adjust later                     #9
     #header_sourceaddress        =   socket.getsockname()               #10
-    header_sourceaddress        =   2130706433  #Inteiro de 127.0.0.1   #10 2130706433
+    header_sourceaddress        =   2130706433  #Inteiro de 127.0.0.1   #10 - '0b01111111000000000000000000000001' 
     #header_destinationaddress   =   socket.inet_aton ('127.0.0.1')     #11 - socket.inet_aton nao funciona
-    header_destinationaddress   =   2130706433                          #11 - '0b01111111000000000000000000000001' 
+    header_destinationaddress   =   2130706433                          #11 
     header_options              =   0 #adjust later                     #12
 
     #Tem que ser uma struct binaria
@@ -133,9 +130,8 @@ def send_command(socket, command, machine):
     socket.send(ip_header)
     socket.send(command.encode())
     
+    #Recebendo o cabecalho do daemon e descompactando-o
     headerReceive = socket.recv(BUFF_SIZE)
-    
-    #Descompactando o cabecalho
     header = unpack('!BBBHHHHBBHLLL', headerReceive)
     header_version              =   header[0]                           #0
     header_ihdl                 =   header[1]                           #1
@@ -151,12 +147,13 @@ def send_command(socket, command, machine):
     header_destinationaddress   =   header[11]                          #11 - '0b01111111000000000000000000000001' 
     header_options              =   header[12]                          #12
     
+    #Recebendo o resultado da execucao e aguardando para ser se nao vai receber
+    #mais pacotes
     packReceive = socket.recv(BUFF_SIZE)
     result = packReceive.decode()
     receive = recv_all(socket)
 
-    #append is faster than +=
-    #with string_lock:
+    #Montagem da sentenca
     sentence += machine
     sentence += ': '
     sentence += machine
@@ -186,8 +183,6 @@ flagsHtml = ''
 serverName = 'redesServer'
 
 # se comando existe inicia thread
-# precisa fazer verificacao de comandos que PRECISAM de flags e que nao
-# tem como cortar isso?
 if(commandMaq1):
     daemonCliente1 = socket(AF_INET, SOCK_STREAM)
     daemonCliente1.connect(("127.0.0.1", 9001))
@@ -201,6 +196,7 @@ if(commandMaq1):
         '''t = threading.Thread(target=send_command, args=(daemonCliente1, payloadMaq1, 'Machine 1'))
         t.daemon = True
         t.start()'''
+        protocolHeader = 1
         send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
     if(commandMaq1 & 2 == 2):
@@ -209,6 +205,7 @@ if(commandMaq1):
             payloadMaq1 = 'df ' + flagsHtml
         else:
             payloadMaq1 = 'df'
+        protocolHeader = 2
         send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
     if(commandMaq1 & 4 == 4):
@@ -217,6 +214,7 @@ if(commandMaq1):
             payloadMaq1 = 'finger ' + flagsHtml
         else:
             payloadMaq1 = 'finger'
+        protocolHeader = 3
         send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
     if(commandMaq1 & 8 == 8):
@@ -225,6 +223,7 @@ if(commandMaq1):
             payloadMaq1 = 'uptime ' + flagsHtml
         else:
             payloadMaq1 = 'uptime'
+        protocolHeader = 4
         send_command(daemonCliente1, payloadMaq1, 'Machine 1')
 
 if(commandMaq2):
@@ -240,6 +239,7 @@ if(commandMaq2):
         '''t = threading.Thread(target=send_command, args=(daemonCliente2, payloadMaq2, 'Machine 2'))
         t.daemon = True
         t.start()'''
+        protocolHeader = 1
         send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
     if(commandMaq2 & 2 == 2):
@@ -248,6 +248,7 @@ if(commandMaq2):
             payloadMaq2 = 'df ' + flagsHtml
         else:
             payloadMaq2 = 'df'
+        protocolHeader = 2
         send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
     if(commandMaq2 & 4 == 4):
@@ -256,6 +257,7 @@ if(commandMaq2):
             payloadMaq2 = 'finger ' + flagsHtml
         else:
             payloadMaq2 = 'finger'
+        protocolHeader = 3
         send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
     if(commandMaq2 & 8 == 8):
@@ -264,6 +266,7 @@ if(commandMaq2):
             payloadMaq2 = 'uptime ' + flagsHtml
         else:
             payloadMaq2 = 'uptime'
+        protocolHeader = 4
         send_command(daemonCliente2, payloadMaq2, 'Machine 2')
 
 if(commandMaq3):
@@ -279,6 +282,7 @@ if(commandMaq3):
         '''t = threading.Thread(target=send_command, args=(daemonCliente3, payloadMaq3, 'Machine 3'))
         t.daemon = True
         t.start()'''
+        protocolHeader = 1
         send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
     if(commandMaq3 & 2 == 2):
@@ -287,6 +291,7 @@ if(commandMaq3):
             payloadMaq3 = 'df ' + flagsHtml
         else:
             payloadMaq3 = 'df'
+        protocolHeader = 2
         send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
     if(commandMaq3 & 4 == 4):
@@ -295,6 +300,7 @@ if(commandMaq3):
             payloadMaq3 = 'finger ' + flagsHtml
         else:
             payloadMaq3 = 'finger'
+        protocolHeader = 3
         send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
     if(commandMaq3 & 8 == 8):
@@ -303,6 +309,7 @@ if(commandMaq3):
             payloadMaq3 = 'uptime ' + flagsHtml
         else:
             payloadMaq3 = 'uptime'
+        protocolHeader = 4
         send_command(daemonCliente3, payloadMaq3, 'Machine 3')
 
 #Eventos para enviar as mensagens

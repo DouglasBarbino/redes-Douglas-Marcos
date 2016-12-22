@@ -22,6 +22,7 @@ BUFF_SIZE = 1024
 
 def handler(clientsock, addr):
     while True:
+        #Recebe o cabecalho e o comando que sera executado
         data = clientsock.recv(BUFF_SIZE)
         command = clientsock.recv(BUFF_SIZE).decode()
         #Descompactando o cabecalho
@@ -39,20 +40,6 @@ def handler(clientsock, addr):
         header_sourceaddress        =   header[10]                          #10 
         header_destinationaddress   =   header[11]                          #11 - '0b01111111000000000000000000000001' 
         header_options              =   header[12]                          #12
-        
-        '''print('0: ' + str(header_version) + '\r')
-            print('1: ' + str(header_ihdl) + '\r')
-            print('2: ' + str(header_tos) + '\r')
-            print('3: ' + str(header_total_length) + '\r')
-            print('4: ' + str(header_identification) + '\r')
-            print('5: ' + str(header_flags) + '\r')
-            print('6: ' + str(header_fragment) + '\r')
-            print('7: ' + str(header_ttl) + '\r')
-            print('8: ' + str(header_protocol) + '\r')
-            print('9: ' + str(header_checksum) + '\r')
-            print('10: ' + str(header_sourceaddress) + '\r')
-            print('11: ' + str(header_destinationaddress) + '\r')
-            print('12: ' + str(header_options) + '\r')'''
             
         #Montagem do cabecalho (no caso apenas os campos que mudam,
         #o resto segue o mesmo valor que recebeu)
@@ -67,9 +54,7 @@ def handler(clientsock, addr):
         clientsock.send(daemon_header)
         #Tempo para chegar o cabecalho no webserver
         time.sleep(1.0)
-        #if data != '':
         if command != '':
-            #header = unpack('!BBBHHHHBBHLLL', data)
             print('commands received: ' + command)
             executionOfCommands = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
             (data, err) = executionOfCommands.communicate()
@@ -82,7 +67,9 @@ def handler(clientsock, addr):
             
     clientsock.close()
 
+####### MAIN ########
 
+#Recebendo os parametros
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", type=int, help="comando para porta.")
 args = parser.parse_args()
@@ -97,20 +84,3 @@ while True:
     clientsock, addr = daemonServer.accept()
     #thread.start_new_thread(handler, (clientsock, addr))
     handler(clientsock, addr)
-    #Para pegar a execucao do comando
-    #Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
-    #talvez eu preferisse o pexpect
-
-    #clienteSocket, endereco = daemonServer.accept()
-     
-    #sentence = clienteSocket.recv(1024).decode()
-    #print(sentence)
-    
-    ##Para pegar a execucao do comando
-    ##Fonte: https://www.cyberciti.biz/faq/python-execute-unix-linux-command-examples/
-    ##talvez eu preferisse o pexpect
-    #execucao = subprocess.Popen(sentence, stdout=subprocess.PIPE, shell=True)
-    #(output, err) = execucao.communicate()
-    #Nao converte, pois a saida eh em bytes
-    #clienteSocket.send(output)
-    #clienteSocket.close()
