@@ -35,34 +35,31 @@ class SimpleTopo(Topo):
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self ).__init__()
-        router = self.addSwitch('Router')
-        switch = self.addSwitch('Switch0')
-        host1 = self.addNode('192.168.0.1')
-        host2 = self.addNode('192.168.0.2')
+        routers = []
+        router = self.addSwitch('R1')
+        routers.append(router)
+        switch = self.addSwitch('S1')
+        hosts = []
+        for i in xrange(2):
+            #Cria host, o adiciona no vetor e faz a ligacao com o Switch
+            host = self.addNode('H%d' % (i+1))
+            hosts.append(host)
+            self.addLink(switch, host)
+        #Ligacao Roteador e Switch
         self.addLink(router, switch)
-        self.addLink(switch, host1)
-        self.addLink(switch, host2)
         return
 
 
 def getIP(hostname):
-    AS, idx = hostname.replace('h', '').split('-')
+    AS = hostname.replace('H', '')
     AS = int(AS)
-    if AS == 4:
-        AS = 3
-    ip = '%s.0.%s.1/24' % (10+AS, idx)
+    ip = '192.168.0.%s/24' % (AS)
     return ip
 
 
-def getGateway(hostname):
-    AS, idx = hostname.replace('h', '').split('-')
-    AS = int(AS)
-    # This condition gives AS4 the same IP range as AS3 so it can be an
-    # attacker.
-    if AS == 4:
-        AS = 3
-    gw = '%s.0.%s.254' % (10+AS, idx)
-    return gw
+'''def getGateway(hostname):
+    gw = '192.168.0.254'
+    return gw'''
 
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid logs/*")
@@ -70,7 +67,7 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
 
-    net = Mininet(topo=SimpleTopo(), switch=Router)
+    net = Mininet(topo=SimpleTopo())
     net.start()
     for router in net.switches:
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
@@ -80,18 +77,18 @@ def main():
         % args.sleep)
     sleep(args.sleep)
 
-    for router in net.switches:
+    '''for router in net.switches:
         if router.name == ROGUE_AS_NAME and not FLAGS_rogue_as:
             continue
         router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
         router.waitOutput()
         router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
         router.waitOutput()
-        log("Starting zebra and bgpd on %s" % router.name)
+        log("Starting zebra and bgpd on %s" % router.name)'''
 
     for host in net.hosts:
         host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
-        host.cmd("route add default gw %s" % (getGateway(host.name)))
+        host.cmd("route add default gw '192.168.0.254'")
 
     CLI(net)
     net.stop()
