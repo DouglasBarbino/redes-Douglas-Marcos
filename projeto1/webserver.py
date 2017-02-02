@@ -18,7 +18,6 @@ TODO:
     - alter how commands are being verified if they are valid, uptime for exampel
 """
 
-#Funcao para verificar se tal comando foi requerido para ser executado no daemon        
 from socket import *
 from struct import *
 import threading
@@ -31,9 +30,9 @@ BUFF_SIZE = 1024
 sentence = ''
 protocolHeader = 0
 
-# simplifying this html stuff (too long and too ugly)
+# simplificando verificacao de html
 def verifyCheckboxHtml(maqNumber, req):
-    # using a binary flag because im fancy
+    # usando flags de binario para a verificacao dos comandos
     # 1 - ps | 2 - df | 4 - finger | 8 - uptime
     command = 0
     maqCheckbox = req.getvalue('maq' + maqNumber + '_ps')
@@ -57,7 +56,7 @@ def verifyCheckboxHtml(maqNumber, req):
 def getFlagsHtml(maqNumber, command, req):
     return req.getvalue('maq' + maqNumber + '-' + command)
 
-#works dont ask me why or how
+# crc funcionando
 def crcSixteen(buffer, crc = 0, poly = 0xa001):
     buffSize = len(buffer)
     
@@ -72,7 +71,7 @@ def crcSixteen(buffer, crc = 0, poly = 0xa001):
 
     return crc
 
-# functions for network operations
+# funcoes para network com quebra dos pacotes
 def recv_all(socket, timeout=2):
     socket.setblocking(0)
 
@@ -80,10 +79,10 @@ def recv_all(socket, timeout=2):
     data = ''
     begin=time.time()
     while True:
-        #tenho dado, break depois do timeout
+        # tenho dado, break depois do timeout
         if full_data and time.time()-begin > timeout:
             break
-        #nao consegui dado, espero 2 vezes o timeout
+        # nao consegui dado, espero 2 vezes o timeout
         elif time.time()-begin > timeout * 2:
             break
 
@@ -100,12 +99,12 @@ def recv_all(socket, timeout=2):
                pass
     return ''.join(full_data)
 
-#threading send function
+# funcao send para threading
 def send_command(socket, command, machine):
     global sentence 
     header = ''
-    #the following comments are flags for the pack and unpack proccess
-    #we cut struct later we trim the code again
+    # the following comments are flags for the pack and unpack proccess
+    # we cut struct later we trim the code again
     header_version              =   2                                   #0
     header_ihdl                 =   8                                   #1
     header_tos                  =   0                                   #2
@@ -168,7 +167,7 @@ def send_command(socket, command, machine):
 
 cgitb.enable()
 
-# we fancy in html verification now
+# verifica o campo de html
 req = cgi.FieldStorage()     
 
 commandMaq1 = verifyCheckboxHtml('1', req)
