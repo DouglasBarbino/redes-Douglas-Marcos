@@ -29,6 +29,31 @@ ROGUE_AS_NAME = 'R4'
 
 def log(s, col="green"):
     print T.colored(s, col)
+    
+class Router(Switch):
+    """Defines a new router that is inside a network namespace so that the
+    individual routing entries don't collide.
+
+    """
+    ID = 0
+    def __init__(self, name, **kwargs):
+        kwargs['inNamespace'] = True
+        Switch.__init__(self, name, **kwargs)
+        Router.ID += 1
+        self.switch_id = Router.ID
+
+    @staticmethod
+    def setup():
+        return
+
+    def start(self, controllers):
+        pass
+
+    def stop(self):
+        self.deleteIntfs()
+
+    def log(self, s, col="magenta"):
+        print T.colored(s, col)
 
 class SimpleTopo(Topo):
     """Topologia com 2 roteadores, 5 switchs e 10 hosts"""
@@ -43,7 +68,7 @@ class SimpleTopo(Topo):
             #Cria roteadores
             router = self.addSwitch('R%d' % (i+1))
             routers.append(router)
-        switchs = []
+        #switchs = []
         for r in xrange(nro_roteadores):
             #Como o primeiro roteador tem 3 switchs e o segundo apenas 2, 
             #o ultimo do primeiro eh feito separado
@@ -51,11 +76,11 @@ class SimpleTopo(Topo):
             for i in xrange(2):
                 #Cria switchs, o adiciona no vetor e faz a ligacao com o roteador
                 switch = self.addSwitch('S%d' % ((i+1)+r*7))
-                switchs.append(switch)
+                #switchs.append(switch)
                 self.addLink(switch, router)
             if (r == 0):
                 switch = self.addSwitch('S3')
-                switchs.append(switch)
+                #switchs.append(switch)
                 self.addLink(switch, router)
         hosts = []
         for s in xrange(nro_switchs):
@@ -88,11 +113,13 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
 
-    net = Mininet(topo=SimpleTopo())
+    net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
-        router.cmd("sysctl -w net.ipv4.ip_forward=1")
-        router.waitOutput()
+        #Diferencia se eh um roteador ou switch pela primeira letra do nome
+        if (router.name[0] == 'R'):
+            router.cmd("sysctl -w net.ipv4.ip_forward=1")
+            router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
         % args.sleep)
