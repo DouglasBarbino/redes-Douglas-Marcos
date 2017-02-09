@@ -95,23 +95,22 @@ def main():
     net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
-        #Diferencia se eh um roteador ou switch pela primeira letra do nome
         if (router.name[0] == 'R'):
-            router.cmd("sysctl -w net.ipv4.ip_forward=1")
-            router.waitOutput()
+            log(router)
+        #router.cmd("sysctl -w net.ipv4.ip_forward=1")
+        #router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
         % args.sleep)
     sleep(args.sleep)
 
-    '''for router in net.switches:
-        if router.name == ROGUE_AS_NAME and not FLAGS_rogue_as:
-            continue
-        router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
-        router.waitOutput()
-        router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
-        router.waitOutput()
-        log("Starting zebra and bgpd on %s" % router.name)'''
+    for router in net.switches:
+        if (router.name[0] == 'R'):
+            router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
+            router.waitOutput()
+            '''router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
+            router.waitOutput()'''
+            log("Starting zebra on %s" % router.name)
 
     for host in net.hosts:
         host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
