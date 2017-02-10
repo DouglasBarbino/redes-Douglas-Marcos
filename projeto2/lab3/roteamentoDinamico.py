@@ -109,10 +109,8 @@ def main():
     net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
-        #Diferencia se eh um roteador ou switch pela primeira letra do nome
-        if (router.name[0] == 'R'):
-            router.cmd("sysctl -w net.ipv4.ip_forward=1")
-            router.waitOutput()
+        router.cmd("sysctl -w net.ipv4.ip_forward=1")
+        router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
         % args.sleep)
