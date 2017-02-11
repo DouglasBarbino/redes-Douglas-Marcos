@@ -55,38 +55,38 @@ class Router(Switch):
         print T.colored(s, col)
 
 class SimpleTopo(Topo):
-    """Topologia com 2 roteadores, 5 switchs e 10 hosts"""
+    """Topologia com 3 roteadores, 6 switchs e 12 hosts"""
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self ).__init__()
         routers = []
-        nro_roteadores = 2
-        nro_switchs = 5
+        nro_roteadores = 3
+        nro_switchs = 4
         nro_hosts_por_switch = 2
         for i in xrange(nro_roteadores):
             #Cria roteadores
             router = self.addSwitch('R%d' % (i+1))
             routers.append(router)
         #switchs = []
-        for r in xrange(nro_roteadores):
-            #Como o primeiro roteador tem 3 switchs e o segundo apenas 2, 
-            #o ultimo do primeiro eh feito separado
-            router = 'R%d' % (r+1)
-            for i in xrange(2):
-                #Cria switchs, o adiciona no vetor e faz a ligacao com o roteador
-                switch = self.addSwitch('S%d' % ((i+1)+r*7))
-                #switchs.append(switch)
-                self.addLink(switch, router)
-            if (r == 0):
-                switch = self.addSwitch('S3')
-                #switchs.append(switch)
-                self.addLink(switch, router)
+        #Dividido em duas partes pelo roteador do meio ter um switch a mais
+        for s in xrange(2):
+            router = 'R%d' % (s+1)
+            #Cria switchs, o adiciona no vetor e faz a ligacao com o roteador
+            switch = self.addSwitch('S%d' % (s+1))
+            #switchs.append(switch)
+            self.addLink(switch, router)
+        for s in xrange(2):
+            router = 'R%d' % (s+2)
+            #Cria switchs, o adiciona no vetor e faz a ligacao com o roteador
+            switch = self.addSwitch('S%d' % (s+3))
+            #switchs.append(switch)
+            self.addLink(switch, router)
         hosts = []
         for s in xrange(nro_switchs):
-            switch = 'S%d' % ((s+1)+(((s+1)//4)*4))
+            switch = 'S%d' % (s+1)
             for i in xrange(nro_hosts_por_switch):
                 #Cria host, o adiciona no vetor e faz a ligacao com o Switch
-                host = self.addNode('H%d-%d' % ((s+1)+(((s+1)//4)*4), i+1))
+                host = self.addNode('H%d-%d' % (s+1, i+1)
                 hosts.append(host)
                 self.addLink(switch, host)
         return
@@ -96,14 +96,14 @@ def getIP(hostname):
     AS, indice = hostname.replace('H', '').split('-')
     AS = int(AS)
     indice = int(indice)
-    ip = '192.168.%s.%s/24' % (AS, indice)
+    ip = '2001:DB8:CAFE:%s::%s' % (AS, indice)
     return ip
 
 
 def getGateway(hostname):
     AS, indice = hostname.replace('H', '').split('-')
     AS = int(AS)
-    gw = '192.168.%s.254' % (AS)
+    gw = '2001:DB8:CAFE:%s::FFFE' % (AS)
     return gw
 
 def main():
@@ -116,7 +116,7 @@ def main():
     net.start()
     for router in net.switches:
         if (router.name[0] == 'R'):
-            router.cmd("sysctl -w net.ipv4.ip_forward=1")
+            router.cmd("sysctl -w net.ipv6.conf.all.forwarding=1")
             router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
@@ -130,7 +130,7 @@ def main():
             '''router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
             router.waitOutput()'''
             log("Starting zebra on %s" % router.name)
-
+            
     for host in net.hosts:
         host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
         host.cmd("route add default gw %s" % (getGateway(host.name)))

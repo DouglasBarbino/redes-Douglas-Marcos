@@ -25,7 +25,6 @@ parser.add_argument('--sleep', default=3, type=int)
 args = parser.parse_args()
 
 FLAGS_rogue_as = args.rogue
-ROGUE_AS_NAME = 'R4'
 
 def log(s, col="green"):
     print T.colored(s, col)
@@ -96,9 +95,8 @@ def main():
     net.start()
     for router in net.switches:
         if (router.name[0] == 'R'):
-            log(router)
-        #router.cmd("sysctl -w net.ipv4.ip_forward=1")
-        #router.waitOutput()
+            router.cmd("sysctl -w net.ipv4.ip_forward=1")
+            router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
         % args.sleep)
