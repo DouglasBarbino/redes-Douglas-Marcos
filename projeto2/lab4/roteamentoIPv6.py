@@ -55,7 +55,7 @@ class Router(Switch):
         print T.colored(s, col)
 
 class SimpleTopo(Topo):
-    """Topologia com 3 roteadores, 6 switchs e 12 hosts"""
+    """Topologia com 3 roteadores, 4 switchs e 8 hosts"""
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self ).__init__()
@@ -86,7 +86,7 @@ class SimpleTopo(Topo):
             switch = 'S%d' % (s+1)
             for i in xrange(nro_hosts_por_switch):
                 #Cria host, o adiciona no vetor e faz a ligacao com o Switch
-                host = self.addNode('H%d-%d' % (s+1, i+1)
+                host = self.addNode('H%d-%d' % (s+1, i+1))
                 hosts.append(host)
                 self.addLink(switch, host)
         return
@@ -96,7 +96,7 @@ def getIP(hostname):
     AS, indice = hostname.replace('H', '').split('-')
     AS = int(AS)
     indice = int(indice)
-    ip = '2001:DB8:CAFE:%s::%s' % (AS, indice)
+    ip = '2001:DB8:CAFE:%s::%s/64' % (AS, indice)
     return ip
 
 
