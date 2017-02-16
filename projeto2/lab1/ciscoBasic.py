@@ -55,7 +55,7 @@ class Router(Switch):
         print T.colored(s, col)
 
 class SimpleTopo(Topo):
-    """Topologia r1 -- s1 -- pc1, pc2"""
+    """Topologia pc3 -- r1 -- s1 -- pc1, pc2"""
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self ).__init__()
@@ -71,6 +71,10 @@ class SimpleTopo(Topo):
             self.addLink(switch, host)
         #Ligacao Roteador e Switch
         self.addLink(router, switch)
+	#Liga PC3 no router
+	host = self.addNode('H3')
+	hosts.append(host)
+	self.addLink(router, host)
         return
 
 

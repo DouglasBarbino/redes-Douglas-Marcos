@@ -1,5 +1,12 @@
-# redes-Douglas-Marcos
-Repositório dos trabalhos da disciplina de Redes 2016/2 da UFSCar
+# Universidade Federal de São Carlos
+Redes de Computadores 2016/2 - Prof. Cesar Marcondes
+
+##  Repositório de Trabalhos
+Alunos: Marcos Vinicius Azevedo da Silva
+        Douglas Barbino
+
+
+### Projeto 1
 
 No primeiro trabalho, o nosso objetivo era o seguinte (extraído da descrição do trabalho):
 " A aplicação que será desenvolvida pelo grupo, irá permitir a um usuário realizar uma busca de resultados de comandos de linha, a partir de um conjunto de "máquinas" Linux, através de uma interface web. Especificamente, a aplicação começa apresentando ao usuário uma página web. Nessa página, o usuário poderá selecionar K máquinas de uma lista, e para cada máquina, selecionar um ou mais dos seguintes comandos: ps, df, finger e uptime. Uma vez que essa interface web (em python) receber estas instruções do browser do usuário, um aplicativo backend, também em python, irá se conectar (sequencialmente, ou em paralelo) a um conjunto de "daemons" rodando em cada uma das "máquinas" da lista. O programa backend então passará os comandos que precisam ser executados às respectivas máquinas remotas. Os "daemons" receberão o comando do programa backend e executarão localmente o comando correspondente. Eles então redirecionarão a sáıda desses comandos, e o backend juntará todas as respostas para criar uma página web de resultados."
