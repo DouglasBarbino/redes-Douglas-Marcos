@@ -27,15 +27,19 @@ No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e
 ## Projeto 2
 ### Topologia 1
 Packet Tracer Map
+
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel2.png?raw=true">
 
 Mininet Links
+
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel1.png?raw=true">
 
 
 ### Topologia 2
 Packet Tracer Map
+
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel3.png?raw=true">
+
 Mininet Links
 
 ### Topologia 3
