@@ -60,7 +60,7 @@ No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e
 
 <b>Mininet Links</b>
 
-<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel6.png?raw=true">
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel8.png?raw=true">
 
 ### Topologia 5
 <b>Packet Tracer Map</b>
