@@ -2,12 +2,12 @@
 ###Redes de Computadores 2016/2 - Prof. Cesar Marcondes
 
 ##  Repositório de Trabalhos
-###Alunos: Marcos Vinicius Azevedo da Silva
-###        Douglas Barbino
+Alunos: 
+Marcos Vinicius Azevedo da Silva
+Douglas Barbino
 
 
-### Projeto 1
-
+## Projeto 1
 No primeiro trabalho, o nosso objetivo era o seguinte (extraído da descrição do trabalho):
 " A aplicação que será desenvolvida pelo grupo, irá permitir a um usuário realizar uma busca de resultados de comandos de linha, a partir de um conjunto de "máquinas" Linux, através de uma interface web. Especificamente, a aplicação começa apresentando ao usuário uma página web. Nessa página, o usuário poderá selecionar K máquinas de uma lista, e para cada máquina, selecionar um ou mais dos seguintes comandos: ps, df, finger e uptime. Uma vez que essa interface web (em python) receber estas instruções do browser do usuário, um aplicativo backend, também em python, irá se conectar (sequencialmente, ou em paralelo) a um conjunto de "daemons" rodando em cada uma das "máquinas" da lista. O programa backend então passará os comandos que precisam ser executados às respectivas máquinas remotas. Os "daemons" receberão o comando do programa backend e executarão localmente o comando correspondente. Eles então redirecionarão a sáıda desses comandos, e o backend juntará todas as respostas para criar uma página web de resultados."
 Além disso, para padronizar todos os backends, foi criado um padrão de cabeçalhos parecido com o IPv4.
@@ -23,3 +23,32 @@ Ao encontrar um comando que deve ser executado, a execução vai para a função
 Com o resultado da execução do daemon, é montada a sentença que será impressa na página HTML de resposta, sendo que após percorrer todas as máquinas são fechadas as conexões com os daemons e se imprime na tela a nova página.
 
 No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e a segunda contendo o comando que deve ser executado. Após descompactar todo o cabeçalho, já se é montado o novo cabeçalho e o envia, realizando após isso a execução do comando por meio da função subprocess.Popen(command, stdout=subprocess.PIPE, shell=True). O que for retornado é armazenando e enviando para o webserver.
+
+## Projeto 2
+### Topologia 1
+Packet Tracer Map
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel2.png?raw=true">
+
+Mininet Links
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel1.png?raw=true">
+
+
+### Topologia 2
+Packet Tracer Map
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel3.png?raw=true">
+Mininet Links
+
+### Topologia 3
+Packet Tracer Map
+
+Mininet Links
+
+### Topologia 4
+Packet Tracer Map
+
+Mininet Links
+
+### Topologia 5
+Packet Tracer Map
+
+Mininet Links
