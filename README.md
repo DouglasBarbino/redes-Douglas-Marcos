@@ -26,33 +26,47 @@ No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e
 
 ## Projeto 2
 ### Topologia 1
-Packet Tracer Map
+<b>Packet Tracer Map</b>
 
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel2.png?raw=true">
 
-Mininet Links
+<b>Mininet Links</b>
 
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel1.png?raw=true">
 
 
 ### Topologia 2
-Packet Tracer Map
+<b>Packet Tracer Map</b>
 
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel3.png?raw=true">
 
-Mininet Links
+<b>Mininet Links</b>
+
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel4.png?raw=true">
 
 ### Topologia 3
-Packet Tracer Map
+<b>Packet Tracer Map</b>
 
-Mininet Links
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel5.png?raw=true">
+
+<b>Mininet Links</b>
+
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel6.png?raw=true">
 
 ### Topologia 4
-Packet Tracer Map
+<b>Packet Tracer Map</b>
 
-Mininet Links
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel5.png?raw=true">
+
+<b>Mininet Links</b>
+
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel6.png?raw=true">
 
 ### Topologia 5
-Packet Tracer Map
+<b>Packet Tracer Map</b>
 
-Mininet Links
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel7.png?raw=true">
+
+<b>Mininet Links</b>
+
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel8.png?raw=true">
