@@ -5,7 +5,7 @@ from mininet.net import Mininet
 from mininet.log import lg, info, setLogLevel
 from mininet.util import dumpNodeConnections, quietRun, moveIntf
 from mininet.cli import CLI
-from mininet.node import Switch, OVSKernelSwitch
+from mininet.node import Switch, OVSKernelSwitch, Node
 
 from subprocess import Popen, PIPE, check_output
 from time import sleep, time
@@ -29,30 +29,18 @@ FLAGS_rogue_as = args.rogue
 def log(s, col="green"):
     print T.colored(s, col)
     
-class Router(Switch):
-    """Defines a new router that is inside a network namespace so that the
-    individual routing entries don't collide.
+class LinuxRouter( Node ):
+    '''Criacao de um roteador por meio de um Node.
+    Fonte: http://recolog.blogspot.com.br/2016/02/emulating-networks-with-routers-using.html'''
 
-    """
-    ID = 0
-    def __init__(self, name, **kwargs):
-        kwargs['inNamespace'] = True
-        Switch.__init__(self, name, **kwargs)
-        Router.ID += 1
-        self.switch_id = Router.ID
+    def config( self, **params ):
+        super( LinuxRouter, self).config( **params )
+        # Enable forwarding on the router
+        self.cmd( 'sysctl -w net.ipv6.conf.all.forwarding=1' )
 
-    @staticmethod
-    def setup():
-        return
-
-    def start(self, controllers):
-        pass
-
-    def stop(self):
-        self.deleteIntfs()
-
-    def log(self, s, col="magenta"):
-        print T.colored(s, col)
+    def terminate( self ):
+        self.cmd( 'sysctl -w net.ipv6.conf.all.forwarding=0' )
+        super( LinuxRouter, self ).terminate()
 
 class SimpleTopo(Topo):
     """Topologia com 3 roteadores, 4 switchs e 8 hosts"""
@@ -65,7 +53,7 @@ class SimpleTopo(Topo):
         nro_hosts_por_switch = 2
         for i in xrange(nro_roteadores):
             #Cria roteadores
-            router = self.addSwitch('R%d' % (i+1))
+            router = self.addNode('R%d' % (i+1), cls=LinuxRouter)
             routers.append(router)
         #switchs = []
         #Dividido em duas partes pelo roteador do meio ter um switch a mais
@@ -86,7 +74,7 @@ class SimpleTopo(Topo):
             switch = 'S%d' % (s+1)
             for i in xrange(nro_hosts_por_switch):
                 #Cria host, o adiciona no vetor e faz a ligacao com o Switch
-                host = self.addNode('H%d-%d' % (s+1, i+1))
+                host = self.addHost('H%d-%d' % (s+1, i+1))
                 hosts.append(host)
                 self.addLink(switch, host)
         return
@@ -112,18 +100,16 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
 
-    net = Mininet(topo=SimpleTopo(), switch=Router)
+    net = Mininet(topo=SimpleTopo())
     net.start()
-    for router in net.switches:
-        if (router.name[0] == 'R'):
-            router.cmd("sysctl -w net.ipv6.conf.all.forwarding=1")
-            router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
         % args.sleep)
     sleep(args.sleep)
 
-    for router in net.switches:
+    #Node tambem conta como host
+    for router in net.hosts:
+        #Configuracoes validas apenas para os roteadores
         if (router.name[0] == 'R'):
             router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
             router.waitOutput()
@@ -132,8 +118,10 @@ def main():
             log("Starting zebra on %s" % router.name)
             
     for host in net.hosts:
-        host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
-        host.cmd("route add default gw %s" % (getGateway(host.name)))
+        #Configuracoes validas apenas para os hosts
+        if (host.name[0] == 'H'):
+            host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
+            host.cmd("route add default gw %s" % (getGateway(host.name)))
 
     CLI(net)
     net.stop()

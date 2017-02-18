@@ -5,7 +5,7 @@ from mininet.net import Mininet
 from mininet.log import lg, info, setLogLevel
 from mininet.util import dumpNodeConnections, quietRun, moveIntf
 from mininet.cli import CLI
-from mininet.node import Switch, OVSKernelSwitch
+from mininet.node import Switch, OVSKernelSwitch, Node
 
 from subprocess import Popen, PIPE, check_output
 from time import sleep, time
@@ -31,30 +31,18 @@ def log(s, col="green"):
     print T.colored(s, col)
 
 
-class Router(Switch):
-    """Defines a new router that is inside a network namespace so that the
-    individual routing entries don't collide.
+class LinuxRouter( Node ):
+    '''Criacao de um roteador por meio de um Node.
+    Fonte: http://recolog.blogspot.com.br/2016/02/emulating-networks-with-routers-using.html'''
 
-    """
-    ID = 0
-    def __init__(self, name, **kwargs):
-        kwargs['inNamespace'] = True
-        Switch.__init__(self, name, **kwargs)
-        Router.ID += 1
-        self.switch_id = Router.ID
+    def config( self, **params ):
+        super( LinuxRouter, self).config( **params )
+        # Enable forwarding on the router
+        self.cmd( 'sysctl net.ipv4.ip_forward=1' )
 
-    @staticmethod
-    def setup():
-        return
-
-    def start(self, controllers):
-        pass
-
-    def stop(self):
-        self.deleteIntfs()
-
-    def log(self, s, col="magenta"):
-        print T.colored(s, col)
+    def terminate( self ):
+        self.cmd( 'sysctl net.ipv4.ip_forward=0' )
+        super( LinuxRouter, self ).terminate()
 
 
 class SimpleTopo(Topo):
@@ -66,7 +54,7 @@ class SimpleTopo(Topo):
         nro_roteadores = 4
         for i in xrange(nro_roteadores):
             #Cria roteadores
-            router = self.addSwitch('R%d' % (i+1))
+            router = self.addNode('R%d' % (i+1), cls=LinuxRouter)
             routers.append(router)
         #switchs = []
         router = 'R1'
@@ -74,36 +62,29 @@ class SimpleTopo(Topo):
         #switchs.append(switch)
         self.addLink(switch, router)
         hosts = []
-        switch = 'S1'
         #Cria host, o adiciona no vetor e faz a ligacao com o Switch
-        host = self.addNode('H1-1')
+        host = self.addHost('H1-1')
         hosts.append(host)
         self.addLink(switch, host)
-        switch = 'S4'
+        router = 'R4'
         for i in xrange(5):
             #Cria host, o adiciona no vetor e faz a ligacao com o Switch
-            host = self.addNode('H4-%d' % (i+1))
+            host = self.addHost('H4-%d' % (i+1))
             hosts.append(host)
-            self.addLink(switch, host)
+            self.addLink(router, host)
 
 
 def getIP(hostname):
     AS, idx = hostname.replace('H', '').split('-')
     AS = int(AS)
-    if AS == 4:
-        AS = 3
-    ip = '%s.0.%s.1/24' % (10+AS, idx)
+    ip = '%s.0.0.1/8' % (180+AS)
     return ip
 
 
 def getGateway(hostname):
     AS, idx = hostname.replace('H', '').split('-')
     AS = int(AS)
-    # This condition gives AS4 the same IP range as AS3 so it can be an
-    # attacker.
-    if AS == 4:
-        AS = 3
-    gw = '%s.0.%s.254' % (10+AS, idx)
+    gw = '%s.0.0.254' % (180+AS)
     return gw
 
 
@@ -118,18 +99,16 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
 
-    net = Mininet(topo=SimpleTopo(), switch=Router)
+    net = Mininet(topo=SimpleTopo())
     net.start()
-    for router in net.switches:
-        if (router.name[0] == 'R'):
-            router.cmd("sysctl -w net.ipv4.ip_forward=1")
-            router.waitOutput()
 
     log("Waiting %d seconds for sysctl changes to take effect..."
         % args.sleep)
     sleep(args.sleep)
 
-    for router in net.switches:
+    #Node tambem conta como host
+    for router in net.hosts:
+        #Configuracoes validas apenas para os roteadores
         if (router.name[0] == 'R'):
             router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
             router.waitOutput()
@@ -138,8 +117,15 @@ def main():
             log("Starting zebra and bgpd on %s" % router.name)
 
     for host in net.hosts:
-        host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
-        host.cmd("route add default gw %s" % (getGateway(host.name)))
+        #Configuracoes validas apenas para os hosts
+        if (host.name[0] == 'H'):
+            #Unico que nao segue um padrao
+            if (host.name == 'H1-1'):
+                host.cmd("ifconfig %s-eth0 %s" % (host.name, '200.18.245.65/27'))
+                host.cmd("route add default gw %s" % ('200.18.245.95'))
+            else:
+                host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
+                host.cmd("route add default gw %s" % (getGateway(host.name)))
 
     CLI(net)
     net.stop()
