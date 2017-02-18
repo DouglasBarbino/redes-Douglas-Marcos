@@ -68,23 +68,23 @@ class SimpleTopo(Topo):
         self.addLink(switch, host)
         router = 'R4'
         for i in xrange(5):
-            #Cria host, o adiciona no vetor e faz a ligacao com o Switch
+            #Cria host, o adiciona no vetor e faz a ligacao com o roteador
             host = self.addHost('H4-%d' % (i+1))
             hosts.append(host)
             self.addLink(router, host)
 
 
 def getIP(hostname):
-    AS, idx = hostname.replace('H', '').split('-')
-    AS = int(AS)
-    ip = '%s.0.0.1/8' % (180+AS)
+    AS, indice = hostname.replace('H', '').split('-')
+    indice = int(indice)
+    ip = '%s.0.0.1/8' % (180+indice)
     return ip
 
 
 def getGateway(hostname):
-    AS, idx = hostname.replace('H', '').split('-')
-    AS = int(AS)
-    gw = '%s.0.0.254' % (180+AS)
+    AS, indice = hostname.replace('H', '').split('-')
+    indice = int(indice)
+    gw = '%s.0.0.254' % (180+indice)
     return gw
 
 
