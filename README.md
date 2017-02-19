@@ -25,6 +25,9 @@ Com o resultado da execução do daemon, é montada a sentença que será impres
 No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e a segunda contendo o comando que deve ser executado. Após descompactar todo o cabeçalho, já se é montado o novo cabeçalho e o envia, realizando após isso a execução do comando por meio da função subprocess.Popen(command, stdout=subprocess.PIPE, shell=True). O que for retornado é armazenando e enviando para o webserver.
 
 ## Projeto 2
+### Objetivo
+O objetivo inicial deste trabalho era a realização dos laboratórios Cisco utilizando Mininet. Abaixo se encontra as topologias que deveriam ser construidas e o resultado obtido no Mininet.
+
 ### Topologia 1
 <b>Packet Tracer Map</b>
 
@@ -70,3 +73,5 @@ No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e
 <b>Mininet Links</b>
 
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel10.png?raw=true">
+
+Uma alteração do enunciado foi realizado no dia 16/02/2017 para que apenas as Topologias 2 e 3 com seu objetivo (Roteamento Estático e Roteamento Dinâmico) fossem implementados.
