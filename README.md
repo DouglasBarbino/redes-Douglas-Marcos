@@ -82,4 +82,7 @@ O projeto não deu certo, algumas vezes o código compila mas não pinga, em out
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/erro2.png?raw=true">
 <br>
 
+Foi tentando também usar chmod e chown para mudar a permissão dos arquivos mas sem resultados, a imagem a seguir mostra que as permissões estão para a biblioteca.
+<img src="">
+
 O arquivo ospf e zebra estão upados no GitHub. Nós do grupo não sabemos o que pode ter dado errado, portanto pelo menos tentamos criar as topologias corretamente que estão no arquivo .py. Outros arquivos de tentativas alternativas não foram upados por não funcionarem ou muitas vezes tentarem criar topologias mais básicas. Gostaria de que se algum grupo conseguiu implementar corretamente que os arquivos fossem compartilhados, já que não temos nenhuma idéia do que pode estar errado.
