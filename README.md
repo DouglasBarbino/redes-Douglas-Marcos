@@ -68,3 +68,5 @@ No daemon.py, são aguardadas duas mensagens: A primeira contendo o cabeçalho e
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel9.png?raw=true">
 
 <b>Mininet Links</b>
+
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel10.png?raw=true">
