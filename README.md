@@ -75,3 +75,11 @@ O objetivo inicial deste trabalho era a realização dos laboratórios Cisco uti
 <img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/rel10.png?raw=true">
 
 Uma alteração do enunciado foi realizado no dia 16/02/2017 para que apenas as Topologias 2 e 3 com seu objetivo (Roteamento Estático e Roteamento Dinâmico) fossem implementados.
+
+O projeto não deu certo, algumas vezes o código compila mas não pinga, em outras nem compila. Um último erro após reescrever grande parte do código foi a permissão de acesso e condição de existência das pastas necessárias para o projeto, que essa foto comprovam sua corretude:
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/erro1.png?raw=true">
+<br>
+<img src="https://github.com/DouglasBarbino/redes-Douglas-Marcos/blob/master/assets/erro2.png?raw=true">
+<br>
+
+O arquivo ospf e zebra estão upados no GitHub. Nós do grupo não sabemos o que pode ter dado errado, portanto pelo menos tentamos criar as topologias corretamente que estão no arquivo .py. Outros arquivos de tentativas alternativas não foram upados por não funcionarem ou muitas vezes tentarem criar topologias mais básicas. Gostaria de que se algum grupo conseguiu implementar corretamente que os arquivos fossem compartilhados, já que não temos nenhuma idéia do que pode estar errado.
