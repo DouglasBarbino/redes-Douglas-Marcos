@@ -72,6 +72,12 @@ class SimpleTopo(Topo):
             host = self.addHost('H4-%d' % (i+1))
             hosts.append(host)
             self.addLink(router, host)
+        #Ligacao entre os roteadores
+        self.addLink('R1', 'R2')
+        self.addLink('R1', 'R3')
+        self.addLink('R2', 'R4')
+        self.addLink('R3', 'R4')
+        return
 
 
 def getIP(hostname):

@@ -70,6 +70,9 @@ class SimpleTopo(Topo):
                 host = self.addHost('H%d-%d' % ((s+1)*10, i+1))
                 hosts.append(host)
                 self.addLink(switch, host)
+        #Ligacao entre os roteadores
+        self.addLink('R1', 'R2')
+        self.addLink('R2', 'R3')
         return
 
 

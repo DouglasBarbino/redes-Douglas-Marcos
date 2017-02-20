@@ -48,7 +48,7 @@ class SimpleTopo(Topo):
         # Add default members to class.
         super(SimpleTopo, self ).__init__()
         routers = []
-        router = self.addNode('R1', cls=LinuxRouter)
+        router = self.addNode('R1', cls=LinuxRouter, ip='192.168.0.254/24')
         routers.append(router)
         switch = self.addSwitch('S1')
         hosts = []
